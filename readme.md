@@ -40,7 +40,7 @@ Follow the following steps to run FUSE for the catchment case study.
 ## B. Populate the bin directory
 To run FUSE, you must use a `FILEMANAGER`, which defines the paths to the FUSE `settings`, `input`, `output` directories, as well as other settings essential to run FUSE (described  in Sections C and D). 
 1. Move the file `fm_catch.txt` provided for the catchment case study to `$(MASTER)/bin/`. This is the `FILEMANAGER` for the catchment case study.
-1. Update the lines 4 to 6 of `fm_catch.txt` using the path of the `fuse_catch` directory on your machine.
+1. Update the lines 3 to 5 of `fm_catch.txt` using the path of the `fuse_catch` directory on your machine.
    
 ## C. Populate the setup directory
 The `setup` directory must contain the following files (provided for the catchment case study):
