@@ -1,0 +1,6 @@
+site_name: FUSE Manual
+nav:
+  - Home: index.md
+  - Input/Output:
+    - FUSE Input: 'input_output/FUSE_input.md'
+theme: readthedocs
