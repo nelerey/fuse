@@ -239,4 +239,5 @@ clean:
 #
 # Copy the executable to the bin directory
 install_URS:
+		mkdir -p $(EXE_PATH)
 		mv $(URS_DRIVER__EX) $(EXE_PATH)
