@@ -33,7 +33,7 @@ Follow the following steps to run FUSE for the catchment case study.
    1. defining the name of the master directory (line 10),
    2. defining the fortran compiler (line 201),
    3. defining the path to the NetCDF libraries (lines 204-224, note that the NetCDF libraries must be compiled using the same compiler that you are using to compile FUSE).
- 1. Compile the SCE code (see Section F below).
+ 1. Compile the SCE code (see Section H below).
  1. Compile the FUSE code (type `make`).
  1. Change to `$(MASTER)/bin/` and try running FUSE by typing `./fuse.exe`. If the output is `1st command-line argument is missing (fileManager)`, you have probably compiled FUSE correctly. 
  
@@ -100,7 +100,7 @@ Run FUSE unsing default parameter values over the grid:
 
 Note that because the gridded data does not contain streamflow, FUSE cannot be calibrated using SCE. Instead, FUSE can be run using pre-defined parameter sets using the `run_pre` mode (description to be added).   
    
-## F. Compile SCE
+## H. Compile SCE
 The code of the shuffled complex evolution method (`$(MASTER)/build/FUSE_SRC/FUSE_SCE/sce.f`) was written in F77, so it must be compiled separately. If you use `ifort`, try the following flags:
   ```
   ifort -O2 -c -fixed sce_16plus.f
