@@ -1,3 +1,4 @@
+
 #========================================================================
 # Makefile to compile FUSE
 #========================================================================
@@ -30,7 +31,7 @@ FC = ifort
 # the libraries are installed. Further, use the libraries that correspond to
 # the compiler you selected. Here are the paths to the intel libraries on
 # the UEA cluster as an example:
-HDF_PATH  = /gpfs/software/hdf5/1.8.15/intel
+HDF_PATH  = /gpfs/software/hdf5/1.10.4/intel
 NCDF_PATH = /gpfs/software/netcdf/4.6.1/intel
 LIBNETCDF = -L$(NCDF_PATH)/lib -lnetcdff -lnetcdf -L$(HDF_PATH)/lib -lhdf5_hl -lhdf5
 INCNETCDF = -I$(NCDF_PATH)/include -I$(HDF_PATH)/include
