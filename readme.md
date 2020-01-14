@@ -30,9 +30,9 @@ Follow the following steps to run FUSE for the catchment case study.
 ## A. Fork this repository and compile FUSE
 1. Fork this repository to a directory `$(MASTER)` on your machine (see the [SUMMA manual](http://summa.readthedocs.io/en/latest/development/SUMMA_and_git/) for a step-by-step procedure)
 1. Change directory to `$(MASTER)/build/` and edit the `Makefile`, by:
-   1. defining the name of the master directory (line 10),
-   2. defining the fortran compiler (line 201),
-   3. defining the path to the NetCDF libraries (lines 204-224, note that the NetCDF libraries must be compiled using the same compiler that you are using to compile FUSE).
+   1. defining the name of the master directory (line 11),
+   2. defining the fortran compiler (line 27),
+   3. defining the path to the NetCDF libraries (lines 34-35, note that the NetCDF libraries should be compiled using the same compiler that you are using to compile FUSE).
  1. Compile the SCE code (see Section H below).
  1. Compile the FUSE code (type `make`).
  1. Change to `$(MASTER)/bin/` and try running FUSE by typing `./fuse.exe`. If the output is `1st command-line argument is missing (fileManager)`, you have probably compiled FUSE correctly. 
