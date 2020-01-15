@@ -1,8 +1,8 @@
 ## Notes on the computing environment
 
-Before you get started, note that:
+This page will guide you through the installation of FUSE. Before you get started, please note that:
 
-1. for this short tutorial, we assume that you will be compiling and running FUSE in a Linux/UNIX environment (for OS X/macOS, have a look at this [page](https://summa.readthedocs.io/en/latest/installation/SUMMA_on_OS_X/) of the SUMMA manual),
+1. below we assume that you will be compiling and running FUSE in a Linux/UNIX environment - for OS X/macOS, have a look at this [page](https://summa.readthedocs.io/en/latest/installation/SUMMA_on_OS_X/) of the SUMMA manual,
 2. you will need a Fortran compiler - FUSE was developed and tested using `ifort`, which we recommend if you have no previous experience with Fortran compilers, note that to use `ifort` you might have to load the associated module (try `module avail` and then `module add`),
 3. you will need access to the NetCDF and HDF libraries - use the libraries compiled with the compiler you selected above, you might have to load them (again, try `module avail` and `module add`), then try `which ncdump`, as this should give you an idea of the path to the NetCDF libraries, the path to the HDF libraries should be similar. Note that these paths are machine-dependent.
 4. you will need data to test FUSE, we provide data for two test cases, start by downloading the data for the [catchment test case](../test_cases/).
@@ -40,7 +40,7 @@ Note that the dimension of the NetCDF files will determine if FUSE is run at the
 
 ## E. Execute FUSE
 
-Run FUSE unsing default parameter values at the catchment scale:
+Run FUSE using default parameter values at the catchment scale:
 ```
 ./fuse.exe fm_catch.txt us_09066300 run_def
 ```
