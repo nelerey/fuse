@@ -1,3 +1,4 @@
+
 #========================================================================
 # Makefile to compile FUSE
 #========================================================================
@@ -7,7 +8,7 @@
 #========================================================================
 
 # Define core directory below which everything resides
-F_MASTER = /glade/u/home/naddor/fuse/
+F_MASTER = /gpfs/home/zvb17bku/fuse/
 
 # Core directory that contains FUSE source code
 F_KORE_DIR = $(F_MASTER)build/FUSE_SRC/
@@ -16,10 +17,38 @@ F_KORE_DIR = $(F_MASTER)build/FUSE_SRC/
 MOD_PATH = $(F_MASTER)build/
 
 # Define the directory for the executables
-EXE_PATH = $(F_MASTER)bin
+EXE_PATH = $(F_MASTER)bin/
 
 #========================================================================
-# PART 1: Assemble all of the FUSE sub-routines
+# PART 1: Define the libraries, driver programs, and executables
+#========================================================================
+
+# Define the fortran compiler
+FC = ifort
+
+# Define the NetCDF and HDF5 libraries. Note that these paths are machine-
+# dependent - consider asking the person in charge of your machine where
+# the libraries are installed. Further, use the libraries that correspond to
+# the compiler you selected. Here are the paths to the intel libraries on
+# the UEA cluster as an example:
+HDF_PATH  = /gpfs/software/hdf5/1.10.4/intel
+NCDF_PATH = /gpfs/software/netcdf/4.6.1/intel
+LIBNETCDF = -L$(NCDF_PATH)/lib -lnetcdff -lnetcdf -L$(HDF_PATH)/lib -lhdf5_hl -lhdf5
+INCNETCDF = -I$(NCDF_PATH)/include -I$(HDF_PATH)/include
+
+# Define the driver program and associated subroutines for the fidelity test
+FUSE__URS_DRIVER = \
+	sobol.f90 \
+  fuse_rmse.f90 \
+	functn.f90 \
+  fuse_driver.f90
+URS_DRIVER = $(patsubst %, $(DRIVER_DIR)/%, $(FUSE__URS_DRIVER))
+
+# Define the executables
+URS_DRIVER__EX = fuse.exe
+
+#========================================================================
+# PART 2: Assemble all of the FUSE sub-routines
 #========================================================================
 
 # Define directories
@@ -142,7 +171,6 @@ PRELIM = $(patsubst %, $(ENGINE_DIR)/%, $(FUSE_PRELIM))
 #	getf_ascii.f90 \ # for dist
 #	clrsky_rad.f90 \ # for dist
 #	getPETgrid.f90 \ # for dist
-#	getforcing.f90 \ # still needed?
 
 FUSE_MODRUN= \
 	conv_funcs.f90 \
@@ -150,6 +178,7 @@ FUSE_MODRUN= \
 	clrsky_rad.f90 \
 	getPETgrid.f90 \
 	get_mbands.f90 \
+	get_time_indices.f90\
 	initfluxes.f90 \
 	set_all.f90 \
 	ode_int.f90 \
@@ -187,73 +216,14 @@ FUSE_ALL = $(UTILMS) $(NRUTIL) $(DATAMS) $(TIMUTILS) $(INFOMS) \
 	$(NETCDF) $(SCE)
 
 #========================================================================
-# PART 2: Define the libraries, driver programs, and executables
-#========================================================================
-
-# Define the NetCDF libraries and path to include files
-# Note 1: the order of the libraries matters, e.g. -lcurl should come
-# before netcdf libraries
-# Note 2: on hydro-c1, /usr/local is a copy (via symbolic link) of /opt
-# Note 3: on cheyenne, loading environment module automatically modify
-# envrionment variables accordingly, e.g. module show netcdf
-
-# Define the Fortran Compiler
-FC = ifort
-
-# Define the NetCDF libraries and path to include files
-ifeq "$(FC)" "gfortran"
-	HDF_PATH  = /usr/local/hdf5
-	NCDF_PATH = /usr/local/netcdf-4.2/gcc-4.4.5
-	LOCL_PATH = /usr/local
-	LIBNETCDF = -L$(NCDF_PATH)/lib -lnetcdff -lnetcdf -L$(HDF_PATH)/lib -lhdf5_hl -lhdf5 -L$(LOCL_PATH)/lib -lsz -lz
-	INCNETCDF = -I$(NCDF_PATH)/include -I$(HDF_PATH)/include
-endif
-
-ifeq "$(FC)" "ifort"
- 	HDF_PATH  = /opt/hdf5
-	NCDF_PATH = /opt/netcdf4-intel
-	SZ_PATH = /opt/szip-2.1
-	Z_PATH = /opt/zlib-1.2.8
-	LIBNETCDF = -lcurl -L$(NCDF_PATH)/lib -lnetcdff -lnetcdf -L$(HDF_PATH)/lib -lhdf5_hl -lhdf5 -L$(SZ_PATH)/lib -lsz -L$(Z_PATH)/lib -lz
-	INCNETCDF = -I$(NCDF_PATH)/include -I$(HDF_PATH)/include
-endif
-
-ifeq "$(FC)" "pgf90"
- LIBNETCDF = -L/usr/local/netcdf4-pgi/lib -lnetcdff -lnetcdf -lhdf5_hl -lhdf5 -lsz -lz
- INCNETCDF = -I/usr/local/netcdf4-pgi/include
-endif
-
-# Define the driver program and associated subroutines for the fidelity test
-FUSE__URS_DRIVER = \
-	sobol.f90 \
-  fuse_rmse.f90 \
-	functn.f90 \
-  fuse_driver.f90
-URS_DRIVER = $(patsubst %, $(DRIVER_DIR)/%, $(FUSE__URS_DRIVER))
-
-# Define the executables
-URS_DRIVER__EX = fuse.exe
-
-#========================================================================
 # PART 3: Compile the puppy
 #========================================================================
 
-# Define flags
-ifeq "$(FC)" "gfortran"
- FLAGS = -static -Wall -g -ffree-line-length-none
-endif
-
-ifeq "$(FC)" "ifort"
+# Define flags - these are compiler-dependent, flags for ifort below
  FLAGS_NORMA = -fast
  # FLAGS_NORMA = -O3 -xHost # nearly as fast as -fast but more stable
  FLAGS_DEBUG = -debug -debug-parameters all -traceback -ftrapuv -g -fpe0 -u -check all -check noarg_temp_created -CB
  # FLAGS_DEBUG = -debug all -g -O0 -check bounds -check arg_temp_created -traceback -fpe0 -ftrapuv -heap-arrays
-endif
-
-ifeq "$(FC)" "pgf90"
- FLAGS1 = -Bstatic -Mbackslash -g -Mchkptr -Mchkstk -Mpgicoff -Minform=inform -Ktrap=divz,inv -Mprof=lines,time
- FLAGS = -Bstatic -Mbackslash -g -Mchkptr -Mchkstk -Mpgicoff -Minform=inform -Ktrap=divz,inv
-endif
 
 # Compile
 all: compile_URS install_URS clean
@@ -270,4 +240,5 @@ clean:
 #
 # Copy the executable to the bin directory
 install_URS:
+		mkdir -p $(EXE_PATH)
 		mv $(URS_DRIVER__EX) $(EXE_PATH)
