@@ -1,6 +1,9 @@
-site_name: FUSE Manual
+site_name: FUSE manual
 nav:
   - Home: index.md
+  - Installation and test cases:
+    - Installation: 'install/install_fuse.md'
+    - Test cases : 'install/test_cases.md'
   - Input/Output:
     - FUSE Input: 'input_output/FUSE_input.md'
-theme: mkdocs
+theme: readthedocs
