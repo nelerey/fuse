@@ -3,4 +3,4 @@ nav:
   - Home: index.md
   - Input/Output:
     - FUSE Input: 'input_output/FUSE_input.md'
-theme: readthedocs
+theme: mkdocs
