@@ -49,8 +49,8 @@ To run FUSE, you must use a `FILEMANAGER`, which defines the paths to the FUSE `
 1. Move the file `fm_catch.txt` provided for the catchment case study to `$(MASTER)/bin/`. This is the `FILEMANAGER` for the catchment case study.
 1. Update the lines 3 to 5 of `fm_catch.txt` using the path of the `fuse_catch` directory on your machine.
    
-## C. Populate the setup directory
-The `setup` directory must contain the following files (provided for the catchment case study):
+## C. Populate the settings directory
+The `settings` directory must contain the following files (provided for the catchment case study):
 
    1. The file `M_DECISIONS` (called `fuse_zDecisions_902.txt` in the case studies) describes the different options available in the FUSE modeling framework. These modeling decisions are described in detail by [Clark et al. (WRR, 2008)](http://dx.doi.org/10.1029/2007WR006735), except decision 9 described in [Henn et al. (WRR, 2015)](http://dx.doi.org/10.1002/2014WR016736).
    2. The file `CONSTRAINTS` (called `fuse_zConstraints_snow.txt` in the case studies) defines in particular the default parameter values and lower and upper parameter bounds. The list of parameters corresponds to those described in [Clark et al. (WRR, 2008)](http://dx.doi.org/10.1029/2007WR006735) and [Henn et al. (WRR, 2015)](http://dx.doi.org/10.1002/2014WR016736). 
