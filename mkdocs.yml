@@ -3,7 +3,8 @@ nav:
   - Home: index.md
   - Installation and test cases:
     - Installation: 'install/install_fuse.md'
-    - Test cases : 'install/test_cases.md'
+    - Test data : 'install/test_data.md'
+    - Test runs: 'install/test_runs.md'
   - Execution modes: 'execution_modes.md'
   - FUSE files:
     - File manager: 'files/file_manager.md'
