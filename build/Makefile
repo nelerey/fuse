@@ -8,7 +8,7 @@
 #========================================================================
 
 # Define core directory below which everything resides
-F_MASTER = /gpfs/home/zvb17bku/fuse/
+F_MASTER = /gpfs/ts0/home/na491/fuse/
 
 # Core directory that contains FUSE source code
 F_KORE_DIR = $(F_MASTER)build/FUSE_SRC/
@@ -25,16 +25,29 @@ EXE_PATH = $(F_MASTER)bin/
 
 # Define the fortran compiler
 FC = ifort
+# FC = gfortran
 
-# Define the NetCDF and HDF5 libraries. Note that these paths are machine-
-# dependent - consider asking the person in charge of your machine where
-# the libraries are installed. Further, use the libraries that correspond to
-# the compiler you selected. Here are the paths to the intel libraries on
-# the UEA cluster as an example:
-HDF_PATH  = /gpfs/software/hdf5/1.10.4/intel
-NCDF_PATH = /gpfs/software/netcdf/4.6.1/intel
-LIBNETCDF = -L$(NCDF_PATH)/lib -lnetcdff -lnetcdf -L$(HDF_PATH)/lib -lhdf5_hl -lhdf5
-INCNETCDF = -I$(NCDF_PATH)/include -I$(HDF_PATH)/include
+# Define the NetCDF and HDF5 libraries. Use the libraries associated with
+# the compiler you selected above. Note that these paths are machine-dependent
+# - consider asking the person in charge of your machine where the libraries are
+# installed. The folders should contain a lib directory - see LIBRARIES
+
+ifeq "$(FC)" "ifort"
+
+	NCDF_PATH = /gpfs/ts0/shared/software/netCDF-Fortran/4.4.4-intel-2017a
+	HDF_PATH  = /gpfs/ts0/shared/software/HDF5/1.8.19-intel-2017a
+
+endif
+
+ifeq "$(FC)" "gfortran"
+
+  NCDF_PATH = /gpfs/ts0/shared/software/netCDF-Fortran/4.4.4-foss-2018b
+	HDF_PATH  = /gpfs/ts0/shared/software/HDF5/1.10.2-foss-2018b
+
+endif
+
+LIBRARIES = -L$(NCDF_PATH)/lib -lnetcdff -lnetcdf -L$(HDF_PATH)/lib -lhdf5_hl -lhdf5
+INCLUDE = -I$(NCDF_PATH)/include -I$(HDF_PATH)/include
 
 # Define the driver program and associated subroutines for the fidelity test
 FUSE__URS_DRIVER = \
@@ -202,10 +215,6 @@ FUSE_NETCDF = \
     put_sstats.f90
 NETCDF = $(patsubst %, $(NETCDF_DIR)/%, $(FUSE_NETCDF))
 
-# Define SCE routines
-# sce_16plus.f is in fortran 77 so it has to be compiled independently
-# ifort -O2 -c -fixed sce_16plus.f
-
 FUSE_SCE = \
 	sce_16plus.o
 SCE = $(patsubst %, $(SCE_DIR)/%, $(FUSE_SCE))
@@ -219,11 +228,21 @@ FUSE_ALL = $(UTILMS) $(NRUTIL) $(DATAMS) $(TIMUTILS) $(INFOMS) \
 # PART 3: Compile the puppy
 #========================================================================
 
-# Define flags - these are compiler-dependent, flags for ifort below
- FLAGS_NORMA = -fast
- # FLAGS_NORMA = -O3 -xHost # nearly as fast as -fast but more stable
- FLAGS_DEBUG = -debug -debug-parameters all -traceback -ftrapuv -g -fpe0 -u -check all -check noarg_temp_created -CB
- # FLAGS_DEBUG = -debug all -g -O0 -check bounds -check arg_temp_created -traceback -fpe0 -ftrapuv -heap-arrays
+# Define flags - these are compiler-dependent
+
+ifeq "$(FC)" "ifort"
+
+ FLAGS_NORMA = -O3 -FR -auto -fltconsistency -fpe0
+ FLAGS_DEBUG = -O0 -p -g -debug -warn all -check all -FR -auto -WB -traceback -fltconsistency -fpe0
+
+endif
+
+ifeq "$(FC)" "gfortran"
+
+ FLAGS_NORMA = -O3 -ffree-line-length-none -fmax-errors=0
+ FLAGS_DEBUG = -p -g -Wall -ffree-line-length-none -fmax-errors=0 -fbacktrace -fcheck=bounds
+
+endif
 
 # Compile
 all: compile_URS install_URS clean
@@ -231,14 +250,14 @@ all: compile_URS install_URS clean
 # compile FUSE into a static library
 compile_URS:
 	$(FC) $(FLAGS_DEBUG) $(FUSE_ALL) $(URS_DRIVER) \
-	$(LIBNETCDF) $(INCNETCDF) -o $(URS_DRIVER__EX)
+	$(LIBRARIES) $(INCLUDE) -o $(URS_DRIVER__EX)
 
 # Remove object files
 clean:
-						rm -f *.o
-						rm -f *.mod
-#
+	rm -f *.o
+	rm -f *.mod
+
 # Copy the executable to the bin directory
 install_URS:
-		mkdir -p $(EXE_PATH)
-		mv $(URS_DRIVER__EX) $(EXE_PATH)
+	mkdir -p $(EXE_PATH)
+	mv $(URS_DRIVER__EX) $(EXE_PATH)
