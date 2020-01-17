@@ -25,25 +25,32 @@ https://dl.dropboxusercontent.com/s/f6omcgz8hsirlr0/fuse_catch.zip?dl=0) for dow
 * grid scale: forcing from a climate model on a 1/8th degree grid for a 58 x 28 grid cells domain - available [here [42MB]](
 https://dl.dropboxusercontent.com/s/g5193e0n01ao33d/fuse_grid.zip?dl=0) for download.
 
-Follow the following steps to run FUSE for the catchment case study.
+Follow the following steps to install FUSE and to run the case studies.
+
+## Notes on the computing environment
+
+Before you get started, note that:
+1. for this short tutorial, we assume that you will be compiling and running FUSE in a Linux/UNIX environment, 
+2. you will need a Fortran compiler - FUSE was developed and tested using `ifort`, which we recommend if you have no previous experience with Fortran compilers, note that to use `ifort` you might have to load the associated module (try `module avail` and then `module add`),
+3. you will need access to the NetCDF and HDF libraries - use the libraries compiled with the compiler you selected above, you might have to load them (again, try `module avail` and `module add`), then try `which ncdump`, as this should give you an idea of the path to the NetCDF libraries, the path to the HDF libraries should be similar. Note that these paths are machine-dependent.
 
 ## A. Fork this repository and compile FUSE
 1. Fork this repository to a directory `$(MASTER)` on your machine (see the [SUMMA manual](http://summa.readthedocs.io/en/latest/development/SUMMA_and_git/) for a step-by-step procedure)
 1. Change directory to `$(MASTER)/build/` and edit the `Makefile`, by:
    1. defining the name of the master directory (line 11),
-   2. defining the fortran compiler (line 27),
-   3. defining the path to the NetCDF libraries (lines 34-35, note that the NetCDF libraries should be compiled using the same compiler that you are using to compile FUSE).
+   2. defining the fortran compiler (line 27), 
+   3. defining the path to the NetCDF and HDF libraries (lines 34-35).
  1. Compile the SCE code (see Section H below).
  1. Compile the FUSE code (type `make`).
  1. Change to `$(MASTER)/bin/` and try running FUSE by typing `./fuse.exe`. If the output is `1st command-line argument is missing (fileManager)`, you have probably compiled FUSE correctly. 
  
 ## B. Populate the bin directory
-To run FUSE, you must use a `FILEMANAGER`, which defines the paths to the FUSE `settings`, `input`, `output` directories, as well as other settings essential to run FUSE (described  in Sections C and D). 
+To run FUSE, you must use a `FILEMANAGER`, which defines the paths to the FUSE `settings`, `input`, `output` directories, as well as other settings essential to run FUSE (described in Sections C and D). 
 1. Move the file `fm_catch.txt` provided for the catchment case study to `$(MASTER)/bin/`. This is the `FILEMANAGER` for the catchment case study.
 1. Update the lines 3 to 5 of `fm_catch.txt` using the path of the `fuse_catch` directory on your machine.
    
-## C. Populate the setup directory
-The `setup` directory must contain the following files (provided for the catchment case study):
+## C. Populate the settings directory
+The `settings` directory must contain the following files (provided for the catchment case study):
 
    1. The file `M_DECISIONS` (called `fuse_zDecisions_902.txt` in the case studies) describes the different options available in the FUSE modeling framework. These modeling decisions are described in detail by [Clark et al. (WRR, 2008)](http://dx.doi.org/10.1029/2007WR006735), except decision 9 described in [Henn et al. (WRR, 2015)](http://dx.doi.org/10.1002/2014WR016736).
    2. The file `CONSTRAINTS` (called `fuse_zConstraints_snow.txt` in the case studies) defines in particular the default parameter values and lower and upper parameter bounds. The list of parameters corresponds to those described in [Clark et al. (WRR, 2008)](http://dx.doi.org/10.1029/2007WR006735) and [Henn et al. (WRR, 2015)](http://dx.doi.org/10.1002/2014WR016736). 
