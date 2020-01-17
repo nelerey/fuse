@@ -4,8 +4,6 @@ FUSE can be run for an individual catchment or on grid. The latter mode is desig
 
 FUSE will automatically adapt to the spatial configuration of the input files: the dimension of the NetCDF files will determine if FUSE is run at the catchment or grid-scale. FUSE will look for the variables `lat` and `lon` and if they are arrays, it will run on the grid they define.
 
-
-
 ## Parameter estimation modes
 
 Run can use three modes, all rely on the same syntax and the same three arguments:

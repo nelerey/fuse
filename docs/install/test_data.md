@@ -2,8 +2,6 @@
 
 To get you started with FUSE, we provide data for two test cases. They will enable you to test FUSE in its two spatial configurations: FUSE can be run for an individual catchment or on grid (see [Execution modes](../../../execution_modes/)).
 
-The dimension of the NetCDF files will determine if FUSE is run at the catchment or grid-scale. FUSE will look for the variables `lat` and `lon` and if they are arrays, it will run on the grid they define.
-
 ## Catchment test case
 
 Observed atmospheric forcing and streamflow estimates for the catchment [Middle Creek near Minturn](https://waterdata.usgs.gov/nwis/inventory/?site_no=09066300&agency_cd=USGS&) in Colorado, USA  - data available [here [0.5MB]](

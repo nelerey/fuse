@@ -6,7 +6,7 @@ FUSE was build from scratch to be modular, it offers several options for each im
 
 ## Description and credits
 
-The FUSE initial implementation (FUSE1) is described in [Clark et al. (WRR, 2008)](http://dx.doi.org/10.1029/2007WR006735). This implementation (which will become FUSE2) was created with users in mind and significantly increases the usability and range of applicability of FUSE1. In particular, it involves four main additional features:
+FUSE initial implementation (FUSE1) is described in [Clark et al. (WRR, 2008)](http://dx.doi.org/10.1029/2007WR006735). The implementation documented here (which will become FUSE2) was created with users in mind and significantly increases the usability and range of applicability of the original version. In particular, it involves four main additional features:
 
 1. a snow module described in [Henn et al. (WRR, 2015)](http://dx.doi.org/10.1002/2014WR016736),
 2. a calibration mode based on the shuffled complex evolution algorithm [(Duan et al., WRR, 1992)](http://dx.doi.org/10.1029/91WR02985),

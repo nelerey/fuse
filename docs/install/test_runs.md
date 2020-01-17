@@ -1,6 +1,6 @@
 ## Run FUSE for the catchment test case
 
-The three next steps will enable you to quickly test if FUSE is running as expected. The instruction were purposefully kept short, but each element is described in detail in the rest of the documentation.
+The three next steps will enable you to quickly test if FUSE is running as expected. The instructions below were purposefully kept short, but each element is described in detail in the rest of the documentation.
 
 1. If you haven't yet, download the data for the [catchment test case](https://dl.dropboxusercontent.com/s/f6omcgz8hsirlr0/fuse_catch.zip?dl=0) to a directory `$(data_catch)`.
 1. Update the lines 3 to 5 of `fm_catch.txt` (this is the file manager) using the path of the `$(data_catch)`.
