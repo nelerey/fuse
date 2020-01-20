@@ -1,4 +1,6 @@
-        !COMPILER-GENERATED INTERFACE MODULE: Thu Jul 14 22:23:02 2016
+        !COMPILER-GENERATED INTERFACE MODULE: Fri Jan 17 15:50:40 2020
+        ! This source file is for reference only and may not completely
+        ! represent the generated interface used by the compiler.
         MODULE I4_SOBOL_WRITE__genmod
           INTERFACE 
             SUBROUTINE I4_SOBOL_WRITE(M,N,SKIP,R,FILE_OUT_NAME)
