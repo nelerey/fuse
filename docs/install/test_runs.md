@@ -10,7 +10,7 @@ The steps below will enable you to test if FUSE is running as expected. The inst
 ./fuse.exe path_to_data_catch/fm_catch.txt us_09066300 run_def
 ```
 
-If FUSE runs and terminates with `Done`, you have setup FUSE correctly.
+If FUSE runs and terminates with `Done`, it is good sign. We will make simulations available with which you can compare your own simulations.
 
 ## Run FUSE for the grid case study
 
@@ -22,4 +22,4 @@ If FUSE runs and terminates with `Done`, you have setup FUSE correctly.
 ./fuse.exe path_to_data_grid/fm_grid.txt cesm1-cam5 run_def
 ```
 
-If FUSE runs and terminates with `Done`, you have setup FUSE correctly.
+If FUSE runs and terminates with `Done`, it is a good. We will make simulations available with which you can compare your own simulations.
