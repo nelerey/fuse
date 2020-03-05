@@ -24,13 +24,15 @@ EXE_PATH = $(F_MASTER)bin/
 #========================================================================
 
 # Define the fortran compiler
+# FC = ifort
 FC = ifort
-# FC = gfortran
 
 # Define the NetCDF and HDF5 libraries. Use the libraries associated with
 # the compiler you selected above. Note that these paths are machine-dependent
 # - consider asking the person in charge of your machine where the libraries are
 # installed. The folders should contain a lib directory - see LIBRARIES
+
+# Paths for the Exeter HPC ISCA
 
 ifeq "$(FC)" "ifort"
 
@@ -249,7 +251,7 @@ all: compile_URS install_URS clean
 
 # compile FUSE into a static library
 compile_URS:
-	$(FC) $(FLAGS_DEBUG) $(FUSE_ALL) $(URS_DRIVER) \
+	$(FC) $(FLAGS_NORMA) $(FUSE_ALL) $(URS_DRIVER) \
 	$(LIBRARIES) $(INCLUDE) -o $(URS_DRIVER__EX)
 
 # Remove object files
