@@ -6,8 +6,8 @@ nav:
     - Test data : 'install/test_data.md'
     - Test runs: 'install/test_runs.md'
   - Modes:
-    - Parameter estimation modes: 'modes/execution_modes.md'
     - Spatial modes: 'modes/spatial_modes.md'
+    - Parameter estimation modes: 'modes/execution_modes.md'
   - Files:
     - File manager: 'files/file_manager.md'
     - Input files: 'files/input_files.md'
