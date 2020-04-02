@@ -12,7 +12,7 @@ The steps below will enable you to test if FUSE is running as expected. The inst
 
 If FUSE runs and terminates with `Done`, it is good sign. We will make simulations available with which you can compare your own simulations.
 
-## Run FUSE for the grid case study
+## Run FUSE for the grid test case
 
 1. If you haven't yet, download the data for the [grid test case](https://dl.dropboxusercontent.com/s/f6omcgz8hsirlr0/fuse_catch.zip?dl=0) to a directory `$(data_grid)`.
 1. Update the lines 3 to 5 of `fm_grid.txt` (this is the file manager) using the path of the `$(data_grid)`.
@@ -22,4 +22,4 @@ If FUSE runs and terminates with `Done`, it is good sign. We will make simulatio
 ./fuse.exe path_to_data_grid/fm_grid.txt cesm1-cam5 run_def
 ```
 
-If FUSE runs and terminates with `Done`, it is a good. We will make simulations available with which you can compare your own simulations.
+If FUSE runs and terminates with `Done`, it is a good sign. We will make simulations available with which you can compare your own simulations.
