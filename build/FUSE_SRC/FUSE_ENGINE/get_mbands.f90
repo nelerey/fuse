@@ -250,10 +250,10 @@ DO iSpat2=1,nSpat2
 
 	 if(.NOT.elev_mask(iSpat1,iSpat2)) THEN ! only check area fraction sum to 1 is not NaN
 
-		 if (abs(sum(MBANDS_INFO_3d(iSpat1,iSpat2,:)%AF)-1).GT.1E-6) then ! check that area fraction sum to 1
+		 if (abs(sum(MBANDS_INFO_3d(iSpat1,iSpat2,:)%AF)-1).GT.1E-2) then ! check that area fraction sum to 1
 
-	 	  print *, 'DIF EB = ', abs(sum(MBANDS_INFO_3d(iSpat1,iSpat2,:)%AF)-1)
-		 	print *, "Area fraction of elevation bands do not sum to 1" ! TODO: use message instead?
+		 	print *, "The area fraction of all the elevation bands do not add up to 1" 
+			print *, 'Difference with 1 = ', abs(sum(MBANDS_INFO_3d(iSpat1,iSpat2,:)%AF)-1)
 			stop
 
 		 end if
