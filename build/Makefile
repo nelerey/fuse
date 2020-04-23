@@ -1,4 +1,3 @@
-
 #========================================================================
 # Makefile to compile FUSE
 #========================================================================
@@ -231,7 +230,6 @@ FUSE_ALL = $(UTILMS) $(NRUTIL) $(DATAMS) $(TIMUTILS) $(INFOMS) \
 #========================================================================
 
 # Define flags - these are compiler-dependent
-
 ifeq "$(FC)" "ifort"
 
  FLAGS_NORMA = -O3 -FR -auto -fltconsistency -fpe0
@@ -266,5 +264,6 @@ install_URS:
 	mkdir -p $(EXE_PATH)
 	mv $(URS_DRIVER__EX) $(EXE_PATH)
 
+# describe how to compile SCE code written in Fortran 77
 sce_16plus.o:$(SCE_DIR)/sce_16plus.f
 	$(FC) $(FLAGS_FIXED) $(SCE_DIR)/sce_16plus.f
