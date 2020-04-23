@@ -8,7 +8,8 @@
 #========================================================================
 
 # Define core directory below which everything resides
-F_MASTER = /gpfs/ts0/home/na491/fuse/
+# Define core directory below which everything resides
+F_MASTER = ${HOME}/src/fuse/
 
 # Core directory that contains FUSE source code
 F_KORE_DIR = $(F_MASTER)build/FUSE_SRC/
@@ -24,27 +25,27 @@ EXE_PATH = $(F_MASTER)bin/
 #========================================================================
 
 # Define the fortran compiler
-# FC = ifort
-FC = ifort
+ifndef FC
+	# FC = ifort
+	FC = gfortran
+endif
 
 # Define the NetCDF and HDF5 libraries. Use the libraries associated with
 # the compiler you selected above. Note that these paths are machine-dependent
 # - consider asking the person in charge of your machine where the libraries are
 # installed. The folders should contain a lib directory - see LIBRARIES
 
-# Paths for the Exeter HPC ISCA
-
 ifeq "$(FC)" "ifort"
 
-	NCDF_PATH = /gpfs/ts0/shared/software/netCDF-Fortran/4.4.4-intel-2017a
-	HDF_PATH  = /gpfs/ts0/shared/software/HDF5/1.8.19-intel-2017a
+	NCDF_PATH = ${NCAR_ROOT_NETCDF}
+	HDF_PATH  = ${NCAR_ROOT_HDF}
 
 endif
 
 ifeq "$(FC)" "gfortran"
 
-  NCDF_PATH = /gpfs/ts0/shared/software/netCDF-Fortran/4.4.4-foss-2018b
-	HDF_PATH  = /gpfs/ts0/shared/software/HDF5/1.10.2-foss-2018b
+  NCDF_PATH = ${NCAR_ROOT_NETCDF}
+	HDF_PATH  = ${NCAR_ROOT_HDF}
 
 endif
 
