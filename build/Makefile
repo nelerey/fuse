@@ -217,9 +217,8 @@ FUSE_NETCDF = \
     put_sstats.f90
 NETCDF = $(patsubst %, $(NETCDF_DIR)/%, $(FUSE_NETCDF))
 
-FUSE_SCE = \
+SCE = \
 	sce_16plus.o
-SCE = $(patsubst %, $(SCE_DIR)/%, $(FUSE_SCE))
 
 # ... and stitch it all together...
 FUSE_ALL = $(UTILMS) $(NRUTIL) $(DATAMS) $(TIMUTILS) $(INFOMS) \
@@ -236,6 +235,7 @@ ifeq "$(FC)" "ifort"
 
  FLAGS_NORMA = -O3 -FR -auto -fltconsistency -fpe0
  FLAGS_DEBUG = -O0 -p -g -debug -warn all -check all -FR -auto -WB -traceback -fltconsistency -fpe0
+ FLAGS_FIXED = -O2 -c -fixed
 
 endif
 
@@ -243,6 +243,7 @@ ifeq "$(FC)" "gfortran"
 
  FLAGS_NORMA = -O3 -ffree-line-length-none -fmax-errors=0
  FLAGS_DEBUG = -p -g -Wall -ffree-line-length-none -fmax-errors=0 -fbacktrace -fcheck=bounds
+ FLAGS_FIXED = -O2 -c -ffixed-form
 
 endif
 
@@ -250,7 +251,7 @@ endif
 all: compile_URS install_URS clean
 
 # compile FUSE into a static library
-compile_URS:
+compile_URS: sce_16plus.o
 	$(FC) $(FLAGS_NORMA) $(FUSE_ALL) $(URS_DRIVER) \
 	$(LIBRARIES) $(INCLUDE) -o $(URS_DRIVER__EX)
 
@@ -263,3 +264,6 @@ clean:
 install_URS:
 	mkdir -p $(EXE_PATH)
 	mv $(URS_DRIVER__EX) $(EXE_PATH)
+
+sce_16plus.o:$(SCE_DIR)/sce_16plus.f
+	$(FC) $(FLAGS_FIXED) $(SCE_DIR)/sce_16plus.f
