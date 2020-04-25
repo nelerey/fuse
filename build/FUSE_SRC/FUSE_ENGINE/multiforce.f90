@@ -76,6 +76,7 @@ MODULE multiforce
   REAL(sp)                              :: deltim=-1._dp             ! length of time step (days)
 
   ! dimension information
+  INTEGER(i4b)                          :: startSpat2=-1             ! number of points in 1st spatial dimension
   INTEGER(i4b)                          :: nSpat1=-1                 ! number of points in 1st spatial dimension
   INTEGER(i4b)                          :: nSpat2=-1                 ! number of points in 2nd spatial dimension
   LOGICAL(LGT)                          :: GRID_FLAG                 ! spatial flag .true. if grid

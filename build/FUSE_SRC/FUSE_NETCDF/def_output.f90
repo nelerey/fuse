@@ -20,6 +20,8 @@ SUBROUTINE DEF_OUTPUT(nSpat1,nSpat2,NPSET,NTIM)
   USE multiforce, only: timeUnits                       ! units string
   USE multistate, only: ncid_out                        ! NetCDF output file ID
 
+  use mpi
+
   IMPLICIT NONE
 
   ! input
@@ -49,13 +51,27 @@ SUBROUTINE DEF_OUTPUT(nSpat1,nSpat2,NPSET,NTIM)
   INTEGER(I4B)                           :: TXDIMS(TDIMS) ! variable shape
   INTEGER(I4B)                           :: TSTART(TDIMS), TCOUNT(TDIMS)
 
+  ! ---------------------------------------------------------------------------------------
+  ! MPI variables
+  ! ---------------------------------------------------------------------------------------
+  integer ( kind = 4 ) mpi_error_value
+  integer ( kind = 4 ) mpi_process
+  integer ( kind = 4 ) mpi_nprocesses
+
   include 'netcdf.inc'                                  ! use netCDF libraries
+
+  ! ---------------------------------------------------------------------------------------
+  ! Initialize MPI
+  ! ---------------------------------------------------------------------------------------
+  call MPI_Comm_size(MPI_COMM_WORLD, mpi_nprocesses, mpi_error_value)
+  call MPI_Comm_rank(MPI_COMM_WORLD, mpi_process, mpi_error_value)
 
   ! ---------------------------------------------------------------------------------------
   CALL VARDESCRIBE()  ! get list of variable descriptions
   ! ---------------------------------------------------------------------------------------
 ! put file in define mode
   print *, 'Create NetCDF file for runs:'
+  write(FNAME_NETCDF_RUNS, '(A,I0.5,A)') trim(FNAME_NETCDF_RUNS), mpi_process, ".nc"
   PRINT *, FNAME_NETCDF_RUNS
 
   IERR = NF_CREATE(TRIM(FNAME_NETCDF_RUNS),NF_CLOBBER,ncid_out); CALL HANDLE_ERR(IERR)

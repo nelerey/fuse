@@ -70,6 +70,8 @@ USE model_numerix                                         ! defines decisions on
 
 ! access to model simulation modules
 USE fuse_rmse_module                                      ! run model and compute the root mean squared error
+use mpi
+
 IMPLICIT NONE
 
 ! ---------------------------------------------------------------------------------------
@@ -144,6 +146,22 @@ INTEGER(I4B)                           :: INIFLG  ! 1 = include initial point in
 INTEGER(I4B)                           :: IPRINT  ! 0 = supress printing
 INTEGER(I4B)                           :: ISCE    ! unit number for SCE write
 REAL(MSP)                              :: FUNCTN  ! function name for the model run
+
+! ---------------------------------------------------------------------------------------
+! MPI variables
+! ---------------------------------------------------------------------------------------
+integer ( kind = 4 ) mpi_error_value
+integer ( kind = 4 ) mpi_process
+integer ( kind = 4 ) mpi_nprocesses
+
+
+! ---------------------------------------------------------------------------------------
+! Initialize MPI
+! ---------------------------------------------------------------------------------------
+call MPI_Init(mpi_error_value)
+call MPI_Comm_size(MPI_COMM_WORLD, mpi_nprocesses, mpi_error_value)
+call MPI_Comm_rank(MPI_COMM_WORLD, mpi_process, mpi_error_value)
+
 
 ! ---------------------------------------------------------------------------------------
 ! READ COMMAND LINE ARGUMENTS
@@ -479,6 +497,8 @@ PRINT *, 'Closing output file'
 err = nf90_close(ncid_out)
 !if (err.ne.0) write(*,*) trim(message); if (err.gt.0) stop
 PRINT *, 'Done'
+
+call MPI_Finalize(mpi_error_value)
 
 STOP
 END PROGRAM DISTRIBUTED_DRIVER

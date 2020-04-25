@@ -30,7 +30,7 @@ contains
  USE fuse_fileManager,only:SETNGS_PATH,FORCINGINFO,&   ! defines data directory
                            INPUT_PATH
  USE multiforce,only:forcefile,vname_aprecip           ! model forcing structures
- USE multiforce,only:nspat1,nspat2,numtim_in           ! dimension lengths
+ USE multiforce,only:nspat1,nspat2,startSpat2,numtim_in! dimension lengths
  USE multiforce,only:GRID_FLAG                         ! .true. if distributed
  USE multiforce,only:latitude,longitude                ! dimension arrays
  USE multiforce,only:time_steps,julian_day_input       ! dimension arrays
@@ -38,6 +38,8 @@ contains
  USE multiforce,only:vname_dtime                       ! variable name: time sice reference time
  USE multiforce, only: nForce, nInput                  ! number of parameter set and their names
  USE multiforce, only: NA_VALUE                        ! NA_VALUE for the forcing
+
+ use mpi
 
  IMPLICIT NONE
  ! input
@@ -55,6 +57,19 @@ contains
  integer(i4b),dimension(ndims)          :: dimids_ppt  ! vector of dimension IDs for precipitation
  integer(i4b)                           :: iDimID      ! dimension ID
  integer(i4b)                           :: dimLen      ! dimension length
+
+
+ integer ( kind = 4 ) mpi_error_value
+ integer ( kind = 4 ) mpi_process
+ integer ( kind = 4 ) mpi_nprocesses
+
+
+ ! ---------------------------------------------------------------------------------------
+ ! Initialize MPI
+ ! ---------------------------------------------------------------------------------------
+ call MPI_Comm_size(MPI_COMM_WORLD, mpi_nprocesses, mpi_error_value)
+ call MPI_Comm_rank(MPI_COMM_WORLD, mpi_process, mpi_error_value)
+
  ! ---------------------------------------------------------------------------------------
  ! initialize error control
  ierr=0; message='read_ginfo/'
@@ -82,6 +97,8 @@ contains
 
  end do
 
+ startSpat2 = 1
+
  ! define the spatial flag
  PRINT *, ' '
  if(nSpat1.GT.1.OR.nSpat2.GT.1) THEN
@@ -89,6 +106,7 @@ contains
    GRID_FLAG=.TRUE.
    nInput=3   ! number of variables to be retrieved from input file (P, T, PET)
 
+   ! call split_dims(nSpat2, mpi_process, mpi_nprocesses, startSpat2)
  ELSE
 
    PRINT *, '### FUSE set to run in catchment mode'
@@ -113,7 +131,7 @@ contains
  ! get latitude
  ierr = nf90_inq_varid(ncid, 'latitude', iVarID)
  if(ierr/=0)then; message=trim(message)//trim(nf90_strerror(ierr))//'[variable=latitude]'; return; endif
- ierr = nf90_get_var(ncid, iVarID, latitude, start=(/1/), count=(/nSpat2/)); CALL HANDLE_ERR(IERR)
+ ierr = nf90_get_var(ncid, iVarID, latitude, start=(/startSpat2/), count=(/nSpat2/)); CALL HANDLE_ERR(IERR)
  if(ierr/=0)then; message=trim(message)//trim(nf90_strerror(ierr)); return; endif
 
  ! get time
@@ -255,7 +273,7 @@ contains
  USE multiforce,only:ilook_swdown                       ! variable indice: downward shortwave radiation
  USE multiforce,only:ilook_potevap                      ! variable indice: potential ET
 
- USE multiforce,only:nspat1,nspat2                      ! dimension lengths
+ USE multiforce,only:nspat1,nspat2,startSpat2           ! dimension lengths
  USE multiforce,only:ncid_var                           ! NetCDF ID for forcing variables
  USE multiforce,only:amult_ppt,amult_pet                ! multipliers o convert to mm/day
  USE multiforce,only:gForce                             ! gridded forcing data
@@ -306,7 +324,7 @@ contains
  do ivar=1,3
 
    ! get the data
-   ierr = nf90_get_var(ncid_forc, ncid_var(ivar), gTemp, start=(/1,1,iTim/), count=(/nSpat1,nSpat2,1/)); CALL HANDLE_ERR(IERR)
+   ierr = nf90_get_var(ncid_forc, ncid_var(ivar), gTemp, start=(/1,startSpat2,iTim/), count=(/nSpat1,nSpat2,1/)); CALL HANDLE_ERR(IERR)
    if(ierr/=0)then; message=trim(message)//trim(nf90_strerror(ierr)); return; endif
 
   ! save the data in the structure -- and convert fluxes to mm/day
@@ -360,7 +378,7 @@ contains
  USE multiforce,only:ilook_potevap                      ! variable indice: potential ET
  USE multiforce,only:ilook_q                            ! variable indice: observed discharge
 
- USE multiforce,only:nspat1,nspat2                      ! dimension lengths
+ USE multiforce,only:nspat1,nspat2,startSpat2           ! dimension lengths
  USE multiforce,only:ncid_var                           ! NetCDF ID for forcing variables
  USE multiforce,only:amult_ppt,amult_pet                ! multipliers o convert to mm/day
  USE multiforce,only:gForce_3d                          ! gridded forcing data
@@ -412,7 +430,7 @@ contains
  do ivar=1,nInput
 
   ! get the data
-  ierr = nf90_get_var(ncid_forc, ncid_var(ivar), gTemp, start=(/1,1,itim_start/), count=(/nSpat1,nSpat2,numtim/)); CALL HANDLE_ERR(IERR)
+  ierr = nf90_get_var(ncid_forc, ncid_var(ivar), gTemp, start=(/1,startSpat2,itim_start/), count=(/nSpat1,nSpat2,numtim/)); CALL HANDLE_ERR(IERR)
   if(ierr/=0)then; message=trim(message)//trim(nf90_strerror(ierr)); return; endif
 
   ! save the data in the structure -- and convert fluxes to mm/day

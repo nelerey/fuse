@@ -246,6 +246,10 @@ ifeq "$(FC)" "gfortran"
 
 endif
 
+ifeq "$(MODE)" "distributed"
+	FC = mpif90
+endif
+
 # Compile
 all: compile_URS install_URS clean
 
