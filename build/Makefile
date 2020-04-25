@@ -263,6 +263,7 @@ compile_URS: sce_16plus.o
 clean:
 	rm -f *.o
 	rm -f *.mod
+	rm -f *__genmod.f90
 
 # Copy the executable to the bin directory
 install_URS:
