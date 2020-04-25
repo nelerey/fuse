@@ -232,8 +232,8 @@ FUSE_ALL = $(UTILMS) $(NRUTIL) $(DATAMS) $(TIMUTILS) $(INFOMS) \
 # Define flags - these are compiler-dependent
 ifeq "$(FC)" "ifort"
 
- FLAGS_NORMA = -O3 -FR -auto -fltconsistency -fpe0
- FLAGS_DEBUG = -O0 -p -g -debug -warn all -check all -FR -auto -WB -traceback -fltconsistency -fpe0
+ FLAGS_NORMA = -O3 -FR -auto -fltconsistency -fpe0 -fpp
+ FLAGS_DEBUG = -O0 -p -g -debug -warn all -check all -FR -auto -WB -traceback -fltconsistency -fpe0 -fpp
  FLAGS_FIXED = -O2 -c -fixed
 
 endif
@@ -246,8 +246,12 @@ ifeq "$(FC)" "gfortran"
 
 endif
 
+FLAGS = $(FLAGS_NORMA)
+# FLAGS = $(FLAGS_DEBUG)
+
 ifeq "$(MODE)" "distributed"
 	FC = mpif90
+	MPI_FLAGS = -D__MPI__
 endif
 
 # Compile
@@ -255,12 +259,8 @@ all: compile_URS install_URS clean
 
 # compile FUSE into a static library
 compile_URS: sce_16plus.o
-	$(FC) $(FLAGS_NORMA) $(FUSE_ALL) $(URS_DRIVER) \
-	$(LIBRARIES) $(INCLUDE) -o $(URS_DRIVER__EX)
-
-# compile_URS: sce_16plus.o
-# 	$(FC) $(FLAGS_DEBUG) $(FUSE_ALL) $(URS_DRIVER) \
-# 	$(LIBRARIES) $(INCLUDE) -o $(URS_DRIVER__EX)
+	$(FC) $(FLAGS) $(FUSE_ALL) $(URS_DRIVER) \
+	$(LIBRARIES) $(INCLUDE) $(MPI_FLAGS) -o $(URS_DRIVER__EX)
 
 
 # Remove object files

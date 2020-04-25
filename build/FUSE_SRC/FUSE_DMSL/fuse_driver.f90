@@ -70,8 +70,10 @@ USE model_numerix                                         ! defines decisions on
 
 ! access to model simulation modules
 USE fuse_rmse_module                                      ! run model and compute the root mean squared error
-use mpi
 
+#ifdef __MPI__
+use mpi
+#endif
 IMPLICIT NONE
 
 ! ---------------------------------------------------------------------------------------
@@ -158,10 +160,14 @@ integer ( kind = 4 ) mpi_nprocesses
 ! ---------------------------------------------------------------------------------------
 ! Initialize MPI
 ! ---------------------------------------------------------------------------------------
+#ifdef __MPI__
 call MPI_Init(mpi_error_value)
 call MPI_Comm_size(MPI_COMM_WORLD, mpi_nprocesses, mpi_error_value)
 call MPI_Comm_rank(MPI_COMM_WORLD, mpi_process, mpi_error_value)
-
+#else
+mpi_process = 0
+mpi_nprocesses = 1
+#endif
 
 ! ---------------------------------------------------------------------------------------
 ! READ COMMAND LINE ARGUMENTS
@@ -282,8 +288,8 @@ PCOUNT=0                 ! counter for parameter sets evaluated (shared in MODUL
 IF(fuse_mode == 'run_def')THEN ! run FUSE with default parameter values
 
   ! files to which model run and parameter set will be saved
-  FNAME_NETCDF_RUNS = TRIM(OUTPUT_PATH)//TRIM(dom_id)//'_'//TRIM(FMODEL_ID)//'_runs_def.nc'
-  FNAME_NETCDF_PARA = TRIM(OUTPUT_PATH)//TRIM(dom_id)//'_'//TRIM(FMODEL_ID)//'_para_def.nc'
+  write(FNAME_NETCDF_RUNS, "(A,I0.5,A)") TRIM(OUTPUT_PATH)//TRIM(dom_id)//'_'//TRIM(FMODEL_ID)//'_runs_def', mpi_process, ".nc"
+  write(FNAME_NETCDF_PARA, "(A,I0.5,A)") TRIM(OUTPUT_PATH)//TRIM(dom_id)//'_'//TRIM(FMODEL_ID)//'_para_def', mpi_process, ".nc"
 
   NUMPSET=1  ! only the default parameter set is run
   ALLOCATE(name_psets(NUMPSET))
@@ -498,7 +504,9 @@ err = nf90_close(ncid_out)
 !if (err.ne.0) write(*,*) trim(message); if (err.gt.0) stop
 PRINT *, 'Done'
 
+#ifdef __MPI__
 call MPI_Finalize(mpi_error_value)
+#endif
 
 STOP
 END PROGRAM DISTRIBUTED_DRIVER

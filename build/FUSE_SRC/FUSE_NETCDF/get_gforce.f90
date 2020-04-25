@@ -12,6 +12,33 @@ public::get_varid
 
 contains
 
+ subroutine split_dims(nSpat2, proc, nproc, start)
+     implicit none
+     integer(i4b), intent(inout) :: nSpat2, start
+     integer(i4b), intent(in) :: proc, nproc
+
+     integer(i4b) :: newn, offset, even_multiple, count
+
+     newn = nSpat2 / nproc
+
+     print*, newn, nproc
+
+     even_multiple = nproc * newn
+
+     count = nSpat2 - even_multiple
+     print*, even_multiple, count
+
+     offset = 0
+     if (proc < count) offset = 1
+
+     start = (proc * newn) + min(proc, count) + 1
+
+     nSpat2 = newn + offset
+
+     print*, "PROCESS:", proc, start, start+newn, newn
+
+ end subroutine split_dims
+
  SUBROUTINE read_ginfo(ncid,ierr,message)
  ! ---------------------------------------------------------------------------------------
  ! Creator:
@@ -39,7 +66,9 @@ contains
  USE multiforce, only: nForce, nInput                  ! number of parameter set and their names
  USE multiforce, only: NA_VALUE                        ! NA_VALUE for the forcing
 
+#ifdef __MPI__
  use mpi
+#endif
 
  IMPLICIT NONE
  ! input
@@ -67,8 +96,14 @@ contains
  ! ---------------------------------------------------------------------------------------
  ! Initialize MPI
  ! ---------------------------------------------------------------------------------------
+#ifdef __MPI__
  call MPI_Comm_size(MPI_COMM_WORLD, mpi_nprocesses, mpi_error_value)
  call MPI_Comm_rank(MPI_COMM_WORLD, mpi_process, mpi_error_value)
+#else
+ mpi_process = 0
+ mpi_nprocesses = 1
+#endif
+
 
  ! ---------------------------------------------------------------------------------------
  ! initialize error control
@@ -106,7 +141,7 @@ contains
    GRID_FLAG=.TRUE.
    nInput=3   ! number of variables to be retrieved from input file (P, T, PET)
 
-   ! call split_dims(nSpat2, mpi_process, mpi_nprocesses, startSpat2)
+   call split_dims(nSpat2, mpi_process, mpi_nprocesses, startSpat2)
  ELSE
 
    PRINT *, '### FUSE set to run in catchment mode'

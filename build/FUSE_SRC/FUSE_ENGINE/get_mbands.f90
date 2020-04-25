@@ -150,7 +150,7 @@ USE fuse_fileManager,only:MBANDS_NC      							! defines elevation bands
 
 USE multibands,only:N_BANDS,MBANDS,MBANDS_INFO_3d,Z_FORCING,&
 										Z_FORCING_grid,elev_mask          ! model band structures
-USE multiforce,only:nspat1,nspat2,NA_VALUE_SP                     ! dimension lengths, na_value
+USE multiforce,only:nspat1,nspat2,startSpat2,NA_VALUE_SP                     ! dimension lengths, na_value
 
 IMPLICIT NONE
 ! dummies
@@ -201,11 +201,11 @@ err = nf90_open(CFILE, nf90_nowrite, NCID_EB)
 if (err.ne.0) write(*,*) trim(message); if (err.gt.0) stop
 
 ! get the dimension IDs for elevation_band
-ierr = nf90_inq_dimid(NCID_EB, 'elevation_band', dimid_eb)
+err = nf90_inq_dimid(NCID_EB, 'elevation_band', dimid_eb)
 if(err/=0)then; message=trim(message)//trim(nf90_strerror(err)); return; endif
 
 ! get dimension length
-ierr = nf90_inquire_dimension(ncid_eb,dimid_eb,len=dimLen)
+err = nf90_inquire_dimension(ncid_eb,dimid_eb,len=dimLen)
 if(err/=0)then; message=trim(message)//trim(nf90_strerror(err)); return; endif
 
 ! save the dimension lengths
@@ -213,9 +213,9 @@ N_BANDS = dimLen  ! number of elevation bands
 print *, 'N_BANDS = ', N_BANDS
 
 ! get the variable ID for the fraction of the area contained in each elevation band
-ierr = nf90_inq_varid(NCID_EB, 'area_frac', ivarid_af)
+err = nf90_inq_varid(NCID_EB, 'area_frac', ivarid_af)
 if(err/=0)then; message=trim(message)//trim(nf90_strerror(err)); return; endif
-ierr = nf90_inq_varid(NCID_EB, 'mean_elev', ivarid_me)
+err = nf90_inq_varid(NCID_EB, 'mean_elev', ivarid_me)
 if(err/=0)then; message=trim(message)//trim(nf90_strerror(err)); return; endif
 
 ! allocate 1 data stucture
@@ -232,11 +232,11 @@ IF (ANY(IERR.NE.0)) THEN
 ENDIF
 
 ! import data into temporary stuctures
-ierr = nf90_get_var(NCID_EB, ivarid_af, AF_TEMP, start=(/1,1,1/), count=(/nSpat1,nSpat2,n_bands/)); CALL HANDLE_ERR(IERR)
+err = nf90_get_var(NCID_EB, ivarid_af, AF_TEMP, start=(/1,startSpat2,1/), count=(/nSpat1,nSpat2,n_bands/)); CALL HANDLE_ERR(err)
 if(err/=0)then; message=trim(message)//trim(nf90_strerror(err)); return; endif
 
 ! import data into temporary stuctures
-ierr = nf90_get_var(NCID_EB, ivarid_me, me_TEMP, start=(/1,1,1/), count=(/nSpat1,nSpat2,n_bands/)); CALL HANDLE_ERR(IERR)
+err = nf90_get_var(NCID_EB, ivarid_me, me_TEMP, start=(/1,startSpat2,1/), count=(/nSpat1,nSpat2,n_bands/)); CALL HANDLE_ERR(err)
 if(err/=0)then; message=trim(message)//trim(nf90_strerror(err)); return; endif
 
 ! populate MBANDS_INFO_3d, Z_FORCING_grid and elev_mask
@@ -252,7 +252,7 @@ DO iSpat2=1,nSpat2
 
 		 if (abs(sum(MBANDS_INFO_3d(iSpat1,iSpat2,:)%AF)-1).GT.1E-2) then ! check that area fraction sum to 1
 
-		 	print *, "The area fraction of all the elevation bands do not add up to 1" 
+		 	print *, "The area fraction of all the elevation bands do not add up to 1"
 			print *, 'Difference with 1 = ', abs(sum(MBANDS_INFO_3d(iSpat1,iSpat2,:)%AF)-1)
 			stop
 
