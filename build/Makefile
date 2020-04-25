@@ -254,6 +254,11 @@ compile_URS: sce_16plus.o
 	$(FC) $(FLAGS_NORMA) $(FUSE_ALL) $(URS_DRIVER) \
 	$(LIBRARIES) $(INCLUDE) -o $(URS_DRIVER__EX)
 
+# compile_URS: sce_16plus.o
+# 	$(FC) $(FLAGS_DEBUG) $(FUSE_ALL) $(URS_DRIVER) \
+# 	$(LIBRARIES) $(INCLUDE) -o $(URS_DRIVER__EX)
+
+
 # Remove object files
 clean:
 	rm -f *.o
