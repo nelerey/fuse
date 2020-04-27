@@ -70,6 +70,10 @@ USE model_numerix                                         ! defines decisions on
 
 ! access to model simulation modules
 USE fuse_rmse_module                                      ! run model and compute the root mean squared error
+
+#ifdef __MPI__
+use mpi
+#endif
 IMPLICIT NONE
 
 ! ---------------------------------------------------------------------------------------
@@ -144,6 +148,26 @@ INTEGER(I4B)                           :: INIFLG  ! 1 = include initial point in
 INTEGER(I4B)                           :: IPRINT  ! 0 = supress printing
 INTEGER(I4B)                           :: ISCE    ! unit number for SCE write
 REAL(MSP)                              :: FUNCTN  ! function name for the model run
+
+! ---------------------------------------------------------------------------------------
+! MPI variables
+! ---------------------------------------------------------------------------------------
+integer ( kind = 4 ) mpi_error_value
+integer ( kind = 4 ) mpi_process
+integer ( kind = 4 ) mpi_nprocesses
+
+
+! ---------------------------------------------------------------------------------------
+! Initialize MPI
+! ---------------------------------------------------------------------------------------
+#ifdef __MPI__
+call MPI_Init(mpi_error_value)
+call MPI_Comm_size(MPI_COMM_WORLD, mpi_nprocesses, mpi_error_value)
+call MPI_Comm_rank(MPI_COMM_WORLD, mpi_process, mpi_error_value)
+#else
+mpi_process = 0
+mpi_nprocesses = 1
+#endif
 
 ! ---------------------------------------------------------------------------------------
 ! READ COMMAND LINE ARGUMENTS
@@ -264,8 +288,13 @@ PCOUNT=0                 ! counter for parameter sets evaluated (shared in MODUL
 IF(fuse_mode == 'run_def')THEN ! run FUSE with default parameter values
 
   ! files to which model run and parameter set will be saved
+#ifdef __MPI__
+  write(FNAME_NETCDF_RUNS, "(A,I0.5,A)") TRIM(OUTPUT_PATH)//TRIM(dom_id)//'_'//TRIM(FMODEL_ID)//'_runs_def_', mpi_process, ".nc"
+  write(FNAME_NETCDF_PARA, "(A,I0.5,A)") TRIM(OUTPUT_PATH)//TRIM(dom_id)//'_'//TRIM(FMODEL_ID)//'_para_def_', mpi_process, ".nc"
+#else
   FNAME_NETCDF_RUNS = TRIM(OUTPUT_PATH)//TRIM(dom_id)//'_'//TRIM(FMODEL_ID)//'_runs_def.nc'
   FNAME_NETCDF_PARA = TRIM(OUTPUT_PATH)//TRIM(dom_id)//'_'//TRIM(FMODEL_ID)//'_para_def.nc'
+#endif
 
   NUMPSET=1  ! only the default parameter set is run
   ALLOCATE(name_psets(NUMPSET))
@@ -479,6 +508,10 @@ PRINT *, 'Closing output file'
 err = nf90_close(ncid_out)
 !if (err.ne.0) write(*,*) trim(message); if (err.gt.0) stop
 PRINT *, 'Done'
+
+#ifdef __MPI__
+call MPI_Finalize(mpi_error_value)
+#endif
 
 STOP
 END PROGRAM DISTRIBUTED_DRIVER

@@ -7,7 +7,8 @@
 #========================================================================
 
 # Define core directory below which everything resides
-F_MASTER = /gpfs/ts0/home/na491/fuse/
+# Define core directory below which everything resides
+F_MASTER = ${HOME}/src/fuse/
 
 # Core directory that contains FUSE source code
 F_KORE_DIR = $(F_MASTER)build/FUSE_SRC/
@@ -23,27 +24,27 @@ EXE_PATH = $(F_MASTER)bin/
 #========================================================================
 
 # Define the fortran compiler
-FC = ifort
-#FC = gfortran
+ifndef FC
+	# FC = ifort
+	FC = gfortran
+endif
 
 # Define the NetCDF and HDF5 libraries. Use the libraries associated with
 # the compiler you selected above. Note that these paths are machine-dependent
 # - consider asking the person in charge of your machine where the libraries are
 # installed. The folders should contain a lib directory - see LIBRARIES
 
-# Paths for the Exeter HPC ISCA
-
 ifeq "$(FC)" "ifort"
 
-	NCDF_PATH = /gpfs/ts0/shared/software/netCDF-Fortran/4.4.4-intel-2017a
-	HDF_PATH  = /gpfs/ts0/shared/software/HDF5/1.8.19-intel-2017a
+	NCDF_PATH = ${NCAR_ROOT_NETCDF}
+	HDF_PATH  = ${NCAR_ROOT_HDF}
 
 endif
 
 ifeq "$(FC)" "gfortran"
 
-  NCDF_PATH = /gpfs/ts0/shared/software/netCDF-Fortran/4.4.4-foss-2018b
-	HDF_PATH  = /gpfs/ts0/shared/software/HDF5/1.10.2-foss-2018b
+  NCDF_PATH = ${NCAR_ROOT_NETCDF}
+	HDF_PATH  = ${NCAR_ROOT_HDF}
 
 endif
 
@@ -231,8 +232,8 @@ FUSE_ALL = $(UTILMS) $(NRUTIL) $(DATAMS) $(TIMUTILS) $(INFOMS) \
 # Define flags - these are compiler-dependent
 ifeq "$(FC)" "ifort"
 
- FLAGS_NORMA = -O3 -FR -auto -fltconsistency -fpe0
- FLAGS_DEBUG = -O0 -p -g -debug -warn all -check all -FR -auto -WB -traceback -fltconsistency -fpe0
+ FLAGS_NORMA = -O3 -FR -auto -fltconsistency -fpe0 -fpp
+ FLAGS_DEBUG = -O0 -p -g -debug -warn all -check all -FR -auto -WB -traceback -fltconsistency -fpe0 -fpp
  FLAGS_FIXED = -O2 -c -fixed
 
 endif
@@ -245,18 +246,28 @@ ifeq "$(FC)" "gfortran"
 
 endif
 
+FLAGS = $(FLAGS_NORMA)
+# FLAGS = $(FLAGS_DEBUG)
+
+ifeq "$(MODE)" "distributed"
+	FC = mpif90
+	MPI_FLAGS = -D__MPI__
+endif
+
 # Compile
 all: compile_URS install_URS clean
 
 # compile FUSE into a static library
 compile_URS: sce_16plus.o
-	$(FC) $(FLAGS_NORMA) $(FUSE_ALL) $(URS_DRIVER) \
-	$(LIBRARIES) $(INCLUDE) -o $(URS_DRIVER__EX)
+	$(FC) $(FLAGS) $(FUSE_ALL) $(URS_DRIVER) \
+	$(LIBRARIES) $(INCLUDE) $(MPI_FLAGS) -o $(URS_DRIVER__EX)
+
 
 # Remove object files
 clean:
 	rm -f *.o
 	rm -f *.mod
+	rm -f *__genmod.f90
 
 # Copy the executable to the bin directory
 install_URS:

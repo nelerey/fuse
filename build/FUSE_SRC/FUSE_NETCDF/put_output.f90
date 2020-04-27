@@ -96,7 +96,7 @@ SUBROUTINE PUT_GOUTPUT_3D(istart_sim,istart_in,numtim,IPSET)
 
   USE multiforce, ONLY: timDat,time_steps               ! time data
   USE multistate, only: ncid_out                        ! NetCDF output file ID
-  USE multiforce, ONLY: nspat1,nspat2                   ! spatial dimensions
+  USE multiforce, ONLY: nspat1,nspat2,startSpat2        ! spatial dimensions
   USE multiforce, ONLY: gForce_3d                       ! test only
 
   IMPLICIT NONE
@@ -126,6 +126,7 @@ SUBROUTINE PUT_GOUTPUT_3D(istart_sim,istart_in,numtim,IPSET)
   IERR = NF_OPEN(TRIM(FNAME_NETCDF_RUNS),NF_WRITE,ncid_out); CALL HANDLE_ERR(IERR)
 
   ! define indices for model output
+  ! if enabling parallel output you need 1,startSpat2 instead of 1,1 below
   IND_START = (/1,1,IPSET,istart_sim/)     ! the indices start at 1, i.e. first element in (1, 1, ..., 1)
   IND_COUNT = (/nspat1,nspat2,1,numtim/)   ! third element is 1 because we only write results for one parameter set at a time
 
@@ -172,10 +173,12 @@ SUBROUTINE PUT_GOUTPUT_3D(istart_sim,istart_in,numtim,IPSET)
   ierr = nf_inq_varid(ncid_out,'time',ivar_id); CALL handle_err(ierr)             ! get variable ID for time
   ierr = nf_put_vara_real(ncid_out,ivar_id,istart_sim,numtim,tDat); CALL handle_err(ierr)  ! write time variable
 
-  deallocate(tDat,time_steps_sub)
-
   ! close NetCDF file
   IERR = NF_CLOSE(ncid_out)
-  IERR = NF_CLOSE(ncid_out)
+  ! IERR = NF_CLOSE(ncid_out)
+
+
+  deallocate(tDat,time_steps_sub)
+
 
 END SUBROUTINE PUT_GOUTPUT_3D
