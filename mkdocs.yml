@@ -5,14 +5,10 @@ nav:
     - Installation: 'install/install_fuse.md'
     - Test data : 'install/test_data.md'
     - Test runs: 'install/test_runs.md'
-<<<<<<< HEAD
   - Execution:
-    -  Arguments: 'modes/arguments.md'
-=======
-  - Modelling decisions:
     - Overview: 'modes/overview.md'
+    - Modelling decisions:  'modes/structure.md'
     - Model structure: 'modes/structure.md'
->>>>>>> c18279c3bf9f37d9aa7a608b8743f11a0b80f9b3
     - Parameter estimation modes: 'modes/execution_modes.md'
     - Spatial modes: 'modes/spatial_modes.md'
     - Numerical methods: 'modes/numerical_methods.md'
@@ -24,12 +20,6 @@ nav:
   - Modules:
     - Precipitation: 'modules/1_precip.md'
   - Extras:
-<<<<<<< HEAD
     - Tools for FUSE: 'extras/tofu.md'
     - CAMELS for FUSE: 'extras/camels_for_fuse.md'
-=======
-    - Tools for FUSE: 'tofu.md'
-    - CAMELS for FUSE: 'camels_for_fuse.md'
->>>>>>> c18279c3bf9f37d9aa7a608b8743f11a0b80f9b3
-
 theme: readthedocs
