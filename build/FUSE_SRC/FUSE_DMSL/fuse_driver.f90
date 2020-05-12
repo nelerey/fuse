@@ -162,8 +162,8 @@ integer ( kind = 4 ) mpi_nprocesses
 ! ---------------------------------------------------------------------------------------
 #ifdef __MPI__
 call MPI_Init(mpi_error_value)
-call MPI_Comm_size(MPI_COMM_WORLD, mpi_nprocesses, mpi_error_value)
-call MPI_Comm_rank(MPI_COMM_WORLD, mpi_process, mpi_error_value)
+call MPI_Comm_size(MPI_COMM_WORLD, mpi_nprocesses, mpi_error_value) ! determine the number of processes involved in a communicator (mpi_nproccesses)
+call MPI_Comm_rank(MPI_COMM_WORLD, mpi_process, mpi_error_value) !  determine the rank of the process in the particular communicator’s group.
 #else
 mpi_process = 0
 mpi_nprocesses = 1

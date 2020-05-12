@@ -11,22 +11,33 @@ public::get_gforce_3d
 public::get_varid
 
 contains
+  ! ---------------------------------------------------------------------------------------
+  ! Creator:
+  ! --------
+  ! Ethan Gutmann, 2020
+  ! ---------------------------------------------------------------------------------------
+  ! Purpose:
+  ! --------
+  ! Split domain to allow for MPI. Given proc and nproc, provide start and update nSpat2
 
  subroutine split_dims(nSpat2, proc, nproc, start)
+
      implicit none
      integer(i4b), intent(inout) :: nSpat2, start
      integer(i4b), intent(in) :: proc, nproc
 
      integer(i4b) :: newn, offset, even_multiple, count
 
-     newn = nSpat2 / nproc
+     print*, 'Number of cores to be used (nproc)', nproc
 
-     print*, newn, nproc
+     newn = nSpat2 / nproc  ! number of rows of the domain to be run by each process
+     print*, 'Number of rows of domain per core (newn) ', newn
 
      even_multiple = nproc * newn
+     print*, 'nproc x newn', even_multiple
 
      count = nSpat2 - even_multiple
-     print*, even_multiple, count
+     print*, 'Difference to',nSpat2,':', count
 
      offset = 0
      if (proc < count) offset = 1
@@ -35,7 +46,8 @@ contains
 
      nSpat2 = newn + offset
 
-     print*, "PROCESS:", proc, start, start+newn, newn
+     print*, "PROCESS (proc, start, start+newn, newn)"
+     print*, proc, start, start+newn, newn
 
  end subroutine split_dims
 
@@ -48,7 +60,6 @@ contains
  ! Purpose:
  ! --------
  ! Read grid info (spatial and temporal dimensions) from the NetCDF file
-
  ! ---------------------------------------------------------------------------------------
  ! Modules Modified:
  ! -----------------
@@ -97,9 +108,11 @@ contains
  ! Initialize MPI
  ! ---------------------------------------------------------------------------------------
 #ifdef __MPI__
+ print *,'__MPI__ is defined, getting mpi_nprocesses and mpi_process'
  call MPI_Comm_size(MPI_COMM_WORLD, mpi_nprocesses, mpi_error_value)
  call MPI_Comm_rank(MPI_COMM_WORLD, mpi_process, mpi_error_value)
 #else
+ print *,'__MPI__ is NOT defined, setting mpi_nprocesses = 1 and mpi_process = 0'
  mpi_process = 0
  mpi_nprocesses = 1
 #endif

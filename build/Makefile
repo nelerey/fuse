@@ -7,8 +7,7 @@
 #========================================================================
 
 # Define core directory below which everything resides
-# Define core directory below which everything resides
-F_MASTER = ${HOME}/src/fuse/
+F_MASTER = ${HOME}/fuse/
 
 # Core directory that contains FUSE source code
 F_KORE_DIR = $(F_MASTER)build/FUSE_SRC/
@@ -23,28 +22,28 @@ EXE_PATH = $(F_MASTER)bin/
 # PART 1: Define the libraries, driver programs, and executables
 #========================================================================
 
-# Define the fortran compiler
-ifndef FC
-	# FC = ifort
-	FC = gfortran
-endif
+# Define the fortran compiler - if the FC variable is set in your environment,
+# it is used, otherwise compiler defined below is used
+#ifndef FC
+	FC = ifort
+	#FC = gfortran
+#endif
 
 # Define the NetCDF and HDF5 libraries. Use the libraries associated with
 # the compiler you selected above. Note that these paths are machine-dependent
 # - consider asking the person in charge of your machine where the libraries are
 # installed. The folders should contain a lib directory - see LIBRARIES
-
 ifeq "$(FC)" "ifort"
 
-	NCDF_PATH = ${NCAR_ROOT_NETCDF}
-	HDF_PATH  = ${NCAR_ROOT_HDF}
+	NCDF_PATH = ${ISCA_NCDF_PATH_ifort}
+	HDF_PATH  = ${ISCA_HDF_PATH_ifort}
 
 endif
 
 ifeq "$(FC)" "gfortran"
 
-  NCDF_PATH = ${NCAR_ROOT_NETCDF}
-	HDF_PATH  = ${NCAR_ROOT_HDF}
+	NCDF_PATH = ${ISCA_NCDF_PATH_gfort}
+	HDF_PATH  = ${ISCA_HDF_PATH_gfort}
 
 endif
 
@@ -52,15 +51,15 @@ LIBRARIES = -L$(NCDF_PATH)/lib -lnetcdff -lnetcdf -L$(HDF_PATH)/lib -lhdf5_hl -l
 INCLUDE = -I$(NCDF_PATH)/include -I$(HDF_PATH)/include
 
 # Define the driver program and associated subroutines for the fidelity test
-FUSE__URS_DRIVER = \
+FUSE_DRIVER = \
 	sobol.f90 \
   fuse_rmse.f90 \
 	functn.f90 \
   fuse_driver.f90
-URS_DRIVER = $(patsubst %, $(DRIVER_DIR)/%, $(FUSE__URS_DRIVER))
+DRIVER = $(patsubst %, $(DRIVER_DIR)/%, $(FUSE_DRIVER))
 
 # Define the executables
-URS_DRIVER__EX = fuse.exe
+DRIVER_EX = fuse.exe
 
 #========================================================================
 # PART 2: Assemble all of the FUSE sub-routines
@@ -90,7 +89,7 @@ NRUTIL = $(patsubst %, $(NUMREC_DIR)/%, $(FUSE_NRUTIL))
 
 # Data modules
 FUSE_DATAMS=    \
-        model_defn.f90 \
+  model_defn.f90 \
 	model_defnames.f90 \
 	multiconst.f90 \
 	multiforce.f90 \
@@ -182,7 +181,7 @@ FUSE_PRELIM= \
 PRELIM = $(patsubst %, $(ENGINE_DIR)/%, $(FUSE_PRELIM))
 
 # Define routines for the FUSE model runs
-# 	force_info.f90 \ # for dist
+# force_info.f90 \ # for dist
 #	getf_ascii.f90 \ # for dist
 #	clrsky_rad.f90 \ # for dist
 #	getPETgrid.f90 \ # for dist
@@ -240,28 +239,29 @@ endif
 
 ifeq "$(FC)" "gfortran"
 
- FLAGS_NORMA = -O3 -ffree-line-length-none -fmax-errors=0
- FLAGS_DEBUG = -p -g -Wall -ffree-line-length-none -fmax-errors=0 -fbacktrace -fcheck=bounds
+ FLAGS_NORMA = -O3 -ffree-line-length-none -fmax-errors=0 -cpp
+ FLAGS_DEBUG = -p -g -Wall -ffree-line-length-none -fmax-errors=0 -fbacktrace -fcheck=bounds -cpp
  FLAGS_FIXED = -O2 -c -ffixed-form
 
 endif
 
 FLAGS = $(FLAGS_NORMA)
-# FLAGS = $(FLAGS_DEBUG)
+#FLAGS = $(FLAGS_DEBUG)
 
 ifeq "$(MODE)" "distributed"
-	FC = mpif90
+	#FC = mpif90
+	FC = mpiifort
 	MPI_FLAGS = -D__MPI__
+	DRIVER_EX = fuse_mpi.exe
 endif
 
 # Compile
-all: compile_URS install_URS clean
+all: compile install clean
 
 # compile FUSE into a static library
-compile_URS: sce_16plus.o
-	$(FC) $(FLAGS) $(FUSE_ALL) $(URS_DRIVER) \
-	$(LIBRARIES) $(INCLUDE) $(MPI_FLAGS) -o $(URS_DRIVER__EX)
-
+compile: sce_16plus.o
+	$(FC) $(FLAGS) $(FUSE_ALL) $(DRIVER) \
+	$(LIBRARIES) $(INCLUDE) $(MPI_FLAGS) -o $(DRIVER_EX)
 
 # Remove object files
 clean:
@@ -270,10 +270,10 @@ clean:
 	rm -f *__genmod.f90
 
 # Copy the executable to the bin directory
-install_URS:
+install:
 	mkdir -p $(EXE_PATH)
-	mv $(URS_DRIVER__EX) $(EXE_PATH)
+	mv $(DRIVER_EX) $(EXE_PATH)
 
 # describe how to compile SCE code written in Fortran 77
-sce_16plus.o:$(SCE_DIR)/sce_16plus.f
+sce_16plus.o: $(SCE_DIR)/sce_16plus.f
 	$(FC) $(FLAGS_FIXED) $(SCE_DIR)/sce_16plus.f
