@@ -24,27 +24,23 @@ EXE_PATH = $(F_MASTER)bin/
 
 # Define the fortran compiler - if the FC variable is set in your environment,
 # it is used, otherwise compiler defined below is used
-#ifndef FC
+ifndef FC
 	FC = ifort
-	#FC = gfortran
-#endif
+	FC = gfortran
+endif
 
 # Define the NetCDF and HDF5 libraries. Use the libraries associated with
 # the compiler you selected above. Note that these paths are machine-dependent
 # - consider asking the person in charge of your machine where the libraries are
-# installed. The folders should contain a lib directory - see LIBRARIES
+# installed. The folders should contain a lib directory - see LIBRARIES below
 ifeq "$(FC)" "ifort"
-
 	NCDF_PATH = ${ISCA_NCDF_PATH_ifort}
 	HDF_PATH  = ${ISCA_HDF_PATH_ifort}
-
 endif
 
 ifeq "$(FC)" "gfortran"
-
 	NCDF_PATH = ${ISCA_NCDF_PATH_gfort}
 	HDF_PATH  = ${ISCA_HDF_PATH_gfort}
-
 endif
 
 LIBRARIES = -L$(NCDF_PATH)/lib -lnetcdff -lnetcdf -L$(HDF_PATH)/lib -lhdf5_hl -lhdf5
@@ -248,9 +244,13 @@ endif
 FLAGS = $(FLAGS_NORMA)
 #FLAGS = $(FLAGS_DEBUG)
 
+# MPI: FUSE with MPI has been compiled successfully with mpif90 and mpiifort, use what is avaiable on your system
+# Note: override must be specifed to enable FC passed as argument to be overridden
+# https://www.gnu.org/software/make/manual/html_node/Override-Directive.html#Override-Directive
+
 ifeq "$(MODE)" "distributed"
-	#FC = mpif90
-	FC = mpiifort
+	# override FC = mpif90
+	override FC = mpiifort
 	MPI_FLAGS = -D__MPI__
 	DRIVER_EX = fuse_mpi.exe
 endif
