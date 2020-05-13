@@ -25,8 +25,10 @@ EXE_PATH = $(F_MASTER)bin/
 # Define the fortran compiler - if the FC variable is set in your environment,
 # it is used, otherwise compiler defined below is used
 ifndef FC
+
 	FC = ifort
 	FC = gfortran
+
 endif
 
 # Define the NetCDF and HDF5 libraries. Use the libraries associated with
@@ -34,13 +36,17 @@ endif
 # - consider asking the person in charge of your machine where the libraries are
 # installed. The folders should contain a lib directory - see LIBRARIES below
 ifeq "$(FC)" "ifort"
+
 	NCDF_PATH = ${ISCA_NCDF_PATH_ifort}
 	HDF_PATH  = ${ISCA_HDF_PATH_ifort}
+
 endif
 
 ifeq "$(FC)" "gfortran"
+
 	NCDF_PATH = ${ISCA_NCDF_PATH_gfort}
 	HDF_PATH  = ${ISCA_HDF_PATH_gfort}
+
 endif
 
 LIBRARIES = -L$(NCDF_PATH)/lib -lnetcdff -lnetcdf -L$(HDF_PATH)/lib -lhdf5_hl -lhdf5
@@ -249,10 +255,18 @@ FLAGS = $(FLAGS_NORMA)
 # https://www.gnu.org/software/make/manual/html_node/Override-Directive.html#Override-Directive
 
 ifeq "$(MODE)" "distributed"
-	# override FC = mpif90
-	override FC = mpiifort
+
+	ifeq "$(FC)" "ifort"
+	 override FC = mpiifort
+	endif
+
+	ifeq "$(FC)" "gfortran"
+		override FC = mpif90
+	endif
+
 	MPI_FLAGS = -D__MPI__
 	DRIVER_EX = fuse_mpi.exe
+
 endif
 
 # Compile
