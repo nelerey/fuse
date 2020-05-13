@@ -98,6 +98,7 @@ SUBROUTINE PUT_GOUTPUT_3D(istart_sim,istart_in,numtim,IPSET)
   USE multistate, only: ncid_out                        ! NetCDF output file ID
   USE multiforce, ONLY: nspat1,nspat2,startSpat2        ! spatial dimensions
   USE multiforce, ONLY: gForce_3d                       ! test only
+  USE multiforce, only: GRID_FLAG                          ! .true. if distributed
 
   IMPLICIT NONE
 
@@ -110,8 +111,8 @@ SUBROUTINE PUT_GOUTPUT_3D(istart_sim,istart_in,numtim,IPSET)
   ! internal
   LOGICAL(LGT)                           :: WRITE_VAR   ! used to denote if the variable is written
   INTEGER(I4B)                           :: IERR        ! error code
-  INTEGER(I4B), DIMENSION(4)             :: IND_START   ! start indices
-  INTEGER(I4B), DIMENSION(4)             :: IND_COUNT   ! count indices
+  INTEGER(I4B), DIMENSION(:), ALLOCATABLE  :: IND_START   ! start indices
+  INTEGER(I4B), DIMENSION(:), ALLOCATABLE  :: IND_COUNT   ! count indices
   INTEGER(I4B)                           :: IVAR        ! loop through variables
   REAL(SP)                               :: XVAR        ! desired variable (SP NOT NECESSARILY SP)
   REAL(MSP)                              :: AVAR        ! desired variable (SINGLE PRECISION)
@@ -127,8 +128,16 @@ SUBROUTINE PUT_GOUTPUT_3D(istart_sim,istart_in,numtim,IPSET)
 
   ! define indices for model output
   ! if enabling parallel output you need 1,startSpat2 instead of 1,1 below
-  IND_START = (/1,1,IPSET,istart_sim/)     ! the indices start at 1, i.e. first element in (1, 1, ..., 1)
-  IND_COUNT = (/nspat1,nspat2,1,numtim/)   ! third element is 1 because we only write results for one parameter set at a time
+
+  IF(.NOT.GRID_FLAG)THEN
+    allocate(IND_START(4),IND_COUNT(4))
+    IND_START = (/1,1,IPSET,istart_sim/)     ! the indices start at 1, i.e. first element in (1, 1, ..., 1)
+    IND_COUNT = (/nspat1,nspat2,1,numtim/)   ! third element is 1 because we only write results for one parameter set at a time
+  ELSE
+    allocate(IND_START(3),IND_COUNT(3))
+    IND_START = (/1,1,istart_sim/)     ! no parameter dimension in grid mode
+    IND_COUNT = (/nspat1,nspat2,numtim/)
+  ENDIF
 
   PRINT *, 'IND_START=', IND_START
   PRINT *, 'IND_COUNT=', IND_COUNT
@@ -175,8 +184,7 @@ SUBROUTINE PUT_GOUTPUT_3D(istart_sim,istart_in,numtim,IPSET)
 
   ! close NetCDF file
   IERR = NF_CLOSE(ncid_out)
-  ! IERR = NF_CLOSE(ncid_out)
 
-  deallocate(tDat,time_steps_sub)
+  deallocate(tDat,time_steps_sub,IND_START,IND_COUNT)
 
 END SUBROUTINE PUT_GOUTPUT_3D
