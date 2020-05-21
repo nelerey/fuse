@@ -199,6 +199,14 @@ MODULE FUSE_RMSE_MODULE  ! have as a module because of dynamic arrays
             !IF(abs(NA_VALUE-elev_mask(iSpat1,iSpat2))>0.1.AND.abs(NA_VALUE-MFORCE%temp)>0.1)THEN
             IF(.NOT.elev_mask(iSpat1,iSpat2))THEN
 
+              ! sanity checks on forcing
+              if(MFORCE%PPT.lt.0.0) then; PRINT *, 'Negative precipitation in input file:',iSpat1,iSpat2,MFORCE%PPT; stop; endif
+              if(MFORCE%PPT.gt.5000.0) then; PRINT *, 'Precipitation greater than 5000 in input file:',iSpat1,iSpat2,MFORCE%PPT; stop; endif
+              if(MFORCE%PET.lt.0.0) then; PRINT *, 'Negative PET in input file'; stop; endif
+              if(MFORCE%PET.gt.100.0) then; PRINT *, 'PET greater than 100 in input file'; stop; endif
+              if(MFORCE%TEMP.lt.-100.0) then; PRINT *, 'Temperature lower than -100 in input file'; stop; endif
+              if(MFORCE%TEMP.gt.100.0) then; PRINT *, 'Temperature greater than 100 in input file'; stop; endif
+
                ! extract model states
                MSTATE = gState_3d(iSpat1,iSpat2,itim_sub)      ! refresh model states
                FSTATE = gState_3d(iSpat1,iSpat2,itim_sub)      ! refresh model states
