@@ -2,24 +2,28 @@ site_name: FUSE manual
 nav:
   - Home: index.md
   - Installation and test cases:
-    - Installation: 'install/install_fuse.md'
-    - Test data : 'install/test_data.md'
-    - Test runs: 'install/test_runs.md'
+      - Installation: 'install/install_fuse.md'
+      - Test data: 'install/test_data.md'
+      - Test runs: 'install/test_runs.md'
   - Execution:
-    - Overview: 'modes/overview.md'
-    - Modelling decisions:  'modes/structure.md'
-    - Model structure: 'modes/structure.md'
-    - Parameter estimation modes: 'modes/execution_modes.md'
-    - Spatial modes: 'modes/spatial_modes.md'
-    - Numerical methods: 'modes/numerical_methods.md'
+      - Overview: 'modes/overview.md'
+      - Modelling decisions: 'modes/structure.md'
+      - Model structure: 'modes/structure.md'
+      - Parameter estimation modes: 'modes/execution_modes.md'
+      - Spatial modes: 'modes/spatial_modes.md'
+      - Numerical methods: 'modes/numerical_methods.md'
   - Files:
-    - File manager: 'files/file_manager.md'
-    - Input files: 'files/input_files.md'
-    - Settings files: 'files/settings_files.md'
-    - Output files: 'files/output_files.md'
+      - File manager: 'files/file_manager.md'
+      - Input files: 'files/input_files.md'
+      - Settings files: 'files/settings_files.md'
+      - Output files: 'files/output_files.md'
   - Modules:
-    - Precipitation: 'modules/1_precip.md'
+      - Precipitation: 'modules/1_precip.md'
   - Extras:
-    - Tools for FUSE: 'extras/tofu.md'
-    - CAMELS for FUSE: 'extras/camels_for_fuse.md'
+      - Tools for FUSE: 'extras/tofu.md'
+      - CAMELS for FUSE: 'extras/camels_for_fuse.md'
 theme: readthedocs
+extra_css:
+  - css/version-select.css
+extra_javascript:
+  - js/version-select.js
