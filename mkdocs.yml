@@ -1,7 +1,9 @@
 site_name: FUSE manual
 repo_url: https://github.com/naddor/fuse
 docs_dir: docs
-theme: readthedocs
+theme:
+  name: readthedocs
+  nav_style: dark
 nav:
   - Home: index.md
   - Installation and test cases:
@@ -25,7 +27,3 @@ nav:
   - Extras:
       - Tools for FUSE: 'extras/tofu.md'
       - CAMELS for FUSE: 'extras/camels_for_fuse.md'
-extra_css:
-  - css/version-select.css
-extra_javascript:
-  - js/version-select.js
