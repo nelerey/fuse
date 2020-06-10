@@ -75,6 +75,8 @@ MODULE multiforce
   REAL(sp)                              :: jdayRef                   ! reference time (days)
   REAL(sp)                              :: deltim=-1._dp             ! length of time step (days)
 
+  LOGICAL(LGT)                          :: SUB_PERIODS_FLAG          ! .true. if subperiods are used to run FUSE
+
   ! dimension information
   INTEGER(i4b)                          :: startSpat2=-1             ! number of points in 1st spatial dimension
   INTEGER(i4b)                          :: nSpat1=-1                 ! number of points in 1st spatial dimension

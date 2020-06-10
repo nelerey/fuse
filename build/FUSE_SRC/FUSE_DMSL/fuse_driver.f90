@@ -26,7 +26,7 @@ USE model_defnames                                        ! defines the integer 
 USE multiforce, ONLY: forcefile,vname_aprecip             ! model forcing structures
 USE multiforce, ONLY: AFORCE, aValid                      ! time series of lumped forcing/response data
 USE multiforce, ONLY: nspat1, nspat2                      ! grid dimensions
-USE multiforce, only: GRID_FLAG                          ! .true. if distributed
+USE multiforce, only: GRID_FLAG                           ! .true. if distributed
 USE multiforce, ONLY: GFORCE, GFORCE_3d                   ! spatial arrays of gridded forcing data
 USE multiforce, only: ancilF, ancilF_3d                   ! ancillary forcing data
 USE multiforce, ONLY: valDat                              ! response data
@@ -38,6 +38,7 @@ USE multiforce, only: numtim_sim, itim_sim                ! length of simulated 
 USE multiforce, only: numtim_sub, itim_sub                ! length of subperiod time series and associated index
 USE multiforce, only: sim_beg,sim_end                     ! timestep indices
 USE multiforce, only: eval_beg,eval_end                   ! timestep indices
+USE multiforce, only: SUB_PERIODS_FLAG                    ! .true. if subperiods are used to run FUSE
 USE multiforce, only: NUMPSET,name_psets                  ! number of parameter set and their names
 
 USE multiforce, only: ncid_forc                           ! NetCDF forcing file ID
@@ -156,7 +157,6 @@ integer ( kind = 4 ) mpi_error_value
 integer ( kind = 4 ) mpi_process
 integer ( kind = 4 ) mpi_nprocesses
 
-
 ! ---------------------------------------------------------------------------------------
 ! Initialize MPI
 ! ---------------------------------------------------------------------------------------
@@ -187,7 +187,7 @@ IF(TRIM(fuse_mode).EQ.'run_pre')THEN
 ENDIF
 
 ! print command-line arguments
-print*, '1st command-line argument (DatString) = ', trim(DatString)
+print*, '1st command-line argument (fileManager) = ', trim(DatString)
 print*, '2nd command-line argument (dom_id) = ', trim(dom_id)
 print*, '3rd command-line argument (fuse_mode) = ', fuse_mode
 IF(TRIM(fuse_mode).EQ.'run_pre')THEN
@@ -237,6 +237,8 @@ if(err/=0)then; write(*,*) trim(message); stop; endif
 
 ! determine period over which to run and evaluate FUSE and their associated indices
 CALL GET_TIME_INDICES()
+
+IF((.NOT.GRID_FLAG).AND.SUB_PERIODS_FLAG)THEN; write(*,*) 'Error: in catchment mode, FUSE must run over entire time series at once, please set numtim_sub to -9999 in the filemanager (', trim(DatString),').'; stop; endif
 
 ! allocate space for the basin-average time series
 allocate(aForce(numtim_sub),aRoute(numtim_sub),stat=err)

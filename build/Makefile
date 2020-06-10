@@ -22,11 +22,13 @@ EXE_PATH = $(F_MASTER)bin/
 # PART 1: Define the libraries, driver programs, and executables
 #========================================================================
 
-# Define the fortran compiler - if the FC variable is set in your environment,
-# it is used, otherwise compiler defined below is used
+# Define the fortran compiler. You have a few options: i) set the FC
+# variable is set in your environment, ii) set it when you compile this
+# Make file (make FC=gfortran), iii) or if don't define it, the compiler
+# defined below is used
 ifndef FC
 
-	FC = ifort
+	#FC = ifort
 	FC = gfortran
 
 endif
@@ -34,7 +36,7 @@ endif
 # Define the NetCDF and HDF5 libraries. Use the libraries associated with
 # the compiler you selected above. Note that these paths are machine-dependent
 # - consider asking the person in charge of your machine where the libraries are
-# installed. The folders should contain a lib directory - see LIBRARIES below
+# installed. The folders should contain a lib directory - see LIBRARIES below.
 ifeq "$(FC)" "ifort"
 
 	NCDF_PATH = ${ISCA_NCDF_PATH_ifort}
@@ -182,12 +184,6 @@ FUSE_PRELIM= \
 	init_state.f90
 PRELIM = $(patsubst %, $(ENGINE_DIR)/%, $(FUSE_PRELIM))
 
-# Define routines for the FUSE model runs
-# force_info.f90 \ # for dist
-#	getf_ascii.f90 \ # for dist
-#	clrsky_rad.f90 \ # for dist
-#	getPETgrid.f90 \ # for dist
-
 FUSE_MODRUN= \
 	conv_funcs.f90 \
 	force_info.f90 \
@@ -247,8 +243,9 @@ ifeq "$(FC)" "gfortran"
 
 endif
 
-FLAGS = $(FLAGS_NORMA)
-#FLAGS = $(FLAGS_DEBUG)
+# select a set of flags
+#FLAGS = $(FLAGS_NORMA)
+FLAGS = $(FLAGS_DEBUG)
 
 # MPI: FUSE with MPI has been compiled successfully with mpif90 and mpiifort, use what is avaiable on your system
 # Note: override must be specifed to enable FC passed as argument to be overridden

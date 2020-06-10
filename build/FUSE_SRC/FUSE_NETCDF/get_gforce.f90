@@ -388,6 +388,8 @@ contains
 
  end do  ! (loop thru forcing variables)
 
+ PRINT *, 'gForce', gForce
+
  ! deallocate space for gTemp
  deallocate(gTemp, stat=ierr)
  if(ierr/=0)then; message=trim(message)//'problem deallocating space for gTemp'; return; endif
@@ -511,6 +513,10 @@ contains
  ! deallocate space for gTemp
  deallocate(gTemp, stat=ierr)
  if(ierr/=0)then; message=trim(message)//'problem deallocating space for gTemp'; return; endif
+
+  !PRINT *, 'PET', gForce_3d(:,:,1:numtim)%pet
+  !PRINT *, 'PPT', gForce_3d(:,:,1:numtim)%ppt
+  !PRINT *, 'TEMP', gForce_3d(:,:,1:numtim)%temp
 
  end subroutine get_gforce_3d
 

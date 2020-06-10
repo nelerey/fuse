@@ -167,7 +167,10 @@ SUBROUTINE PUT_GOUTPUT_3D(istart_sim,istart_in,numtim,IPSET)
     ENDIF
 
     ! write the variable
+    PRINT *, 'here1'
+    PRINT *, VNAME(IVAR)
     XVAR_3d = VAREXTRACT_3d(VNAME(IVAR),numtim)   ! get variable
+    PRINT *, 'here2'
     AVAR_3d = XVAR_3d                             ! convert format
     IERR = NF_INQ_VARID(ncid_out,TRIM(VNAME(IVAR)),IVAR_ID); CALL HANDLE_ERR(IERR) ! get variable ID
     IERR = NF_PUT_VARA_REAL(ncid_out,IVAR_ID,IND_START,IND_COUNT,AVAR_3d); CALL HANDLE_ERR(IERR) ! write data
