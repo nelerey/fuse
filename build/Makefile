@@ -238,7 +238,8 @@ endif
 ifeq "$(FC)" "gfortran"
 
  FLAGS_NORMA = -O3 -ffree-line-length-none -fmax-errors=0 -cpp
- FLAGS_DEBUG = -p -g -Wall -ffree-line-length-none -fmax-errors=0 -fbacktrace -fcheck=bounds -cpp
+ FLAGS_DEBUG = -p -g -Wall -ffree-line-length-none -fmax-errors=0 -fbacktrace -fcheck=bounds -cpp # from Ethan
+ FLAGS_DEBUG = -p -Og -ffree-line-length-none -fmax-errors=0 -fcheck=bounds -cpp # modified
  FLAGS_FIXED = -O2 -c -ffixed-form
 
 endif

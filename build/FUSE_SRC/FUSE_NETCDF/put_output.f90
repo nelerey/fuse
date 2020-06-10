@@ -135,7 +135,7 @@ SUBROUTINE PUT_GOUTPUT_3D(istart_sim,istart_in,numtim,IPSET)
     IND_COUNT = (/nspat1,nspat2,1,numtim/)   ! third element is 1 because we only write results for one parameter set at a time
   ELSE
     allocate(IND_START(3),IND_COUNT(3))
-    IND_START = (/1,1,istart_sim/)     ! no parameter dimension in grid mode
+    IND_START = (/1,1,istart_sim/)           ! no parameter dimension in grid mode
     IND_COUNT = (/nspat1,nspat2,numtim/)
   ENDIF
 
@@ -167,10 +167,9 @@ SUBROUTINE PUT_GOUTPUT_3D(istart_sim,istart_in,numtim,IPSET)
     ENDIF
 
     ! write the variable
-    PRINT *, 'here1'
     PRINT *, VNAME(IVAR)
     XVAR_3d = VAREXTRACT_3d(VNAME(IVAR),numtim)   ! get variable
-    PRINT *, 'here2'
+    PRINT *, 'Extracted'
     AVAR_3d = XVAR_3d                             ! convert format
     IERR = NF_INQ_VARID(ncid_out,TRIM(VNAME(IVAR)),IVAR_ID); CALL HANDLE_ERR(IERR) ! get variable ID
     IERR = NF_PUT_VARA_REAL(ncid_out,IVAR_ID,IND_START,IND_COUNT,AVAR_3d); CALL HANDLE_ERR(IERR) ! write data

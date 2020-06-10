@@ -274,15 +274,13 @@ IMPLICIT NONE
 CHARACTER(*), INTENT(IN)                :: VARNAME     ! variable name
 INTEGER(i4b), INTENT(IN)                :: numtim      ! number of time steps
 ! internal
-real(sp),dimension(:,:,:),allocatable   :: XVAR_3d     ! variable
+real(sp),DIMENSION(nspat1,nspat2,numtim):: XVAR_3d     ! variable
 integer(i4b)                            :: ierr        ! error code
 CHARACTER(LEN=1024)                     :: MESSAGE       ! error message
 ! output
-real(sp),dimension(:,:,:),allocatable   :: VAREXTRACT_3d  ! FUNCTION name
+real(sp), DIMENSION(nspat1,nspat2,numtim)    :: VAREXTRACT_3d  ! FUNCTION name
+
 ! ---------------------------------------------------------------------------------------
-! initialize XVAR_3d
-allocate(XVAR_3d(nSpat1,nSpat2,NUMTIM), VAREXTRACT_3d(nSpat1,nSpat2,NUMTIM), stat=ierr)
-if(ierr/=0)then; message=trim(message)//'problem allocating space for XVAR_3d'; return; endif
 
 !XVAR=-9999._sp
 SELECT CASE (TRIM(VARNAME))
@@ -499,8 +497,9 @@ SELECT CASE (TRIM(VARNAME))
  CASE ('max_iterns') ; XVAR_3d = MAXNUM_ITERNS
 END SELECT
 
-! and, save the output
+! save the output
 VAREXTRACT_3d = XVAR_3d
+
 ! ---------------------------------------------------------------------------------------
 END FUNCTION VAREXTRACT_3d
 
