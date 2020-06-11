@@ -320,7 +320,7 @@ MODULE FUSE_RMSE_MODULE
 
         ! TODO: set gState_3d and MBANDS_VAR_4d to NA
 
-        ! reinitialize states using states at the end of the subperiod
+        ! reinitialize states for next subperiod using last time step
         gState_3d(:,:,1) = gState_3d(:,:,itim_sub+1)
         MBANDS_VAR_4d(:,:,:,1)%SWE         = MBANDS_VAR_4d(:,:,:,itim_sub+1)%SWE
         MBANDS_VAR_4d(:,:,:,1)%SNOWACCMLTN = MBANDS_VAR_4d(:,:,:,itim_sub+1)%SNOWACCMLTN
