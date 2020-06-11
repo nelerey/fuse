@@ -240,7 +240,7 @@ CALL GET_TIME_INDICES()
 
 IF((.NOT.GRID_FLAG).AND.SUB_PERIODS_FLAG)THEN; write(*,*) 'Error: in catchment mode, FUSE must run over entire time series at once, please set numtim_sub to -9999 in the filemanager (', trim(DatString),').'; stop; endif
 
-! allocate space for the basin-average time series
+! allocate space for the basin/grid-average time series
 allocate(aForce(numtim_sub),aRoute(numtim_sub),stat=err)
 !allocate(aForce(numtim_sub),aRoute(numtim_sub),aValid(numtim_sub),stat=err)
 if(err/=0)then; write(*,*) 'unable to allocate space for basin-average time series [aForce,aRoute]'; stop; endif

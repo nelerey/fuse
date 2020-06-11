@@ -231,6 +231,7 @@ ifeq "$(FC)" "ifort"
 
  FLAGS_NORMA = -O3 -FR -auto -fltconsistency -fpe0 -fpp
  FLAGS_DEBUG = -O0 -p -g -debug -warn all -check all -FR -auto -WB -traceback -fltconsistency -fpe0 -fpp
+ FLAGS_DEBUG = -O0 -p -g -debug -check all -FR -auto -WB -traceback -fltconsistency -fpe0 -fpp # without -warn all
  FLAGS_FIXED = -O2 -c -fixed
 
 endif
@@ -238,15 +239,15 @@ endif
 ifeq "$(FC)" "gfortran"
 
  FLAGS_NORMA = -O3 -ffree-line-length-none -fmax-errors=0 -cpp
- FLAGS_DEBUG = -p -g -Wall -ffree-line-length-none -fmax-errors=0 -fbacktrace -fcheck=bounds -cpp # from Ethan
- FLAGS_DEBUG = -p -Og -ffree-line-length-none -fmax-errors=0 -fcheck=bounds -cpp # modified
+ FLAGS_DEBUG = -p -g -Wall -ffree-line-length-none -fmax-errors=0 -fbacktrace -fcheck=bounds -cpp
+ FLAGS_DEBUG = -p -Og -ffree-line-length-none -fmax-errors=0 -fcheck=bounds -cpp # without -warn all
  FLAGS_FIXED = -O2 -c -ffixed-form
 
 endif
 
 # select a set of flags
-#FLAGS = $(FLAGS_NORMA)
-FLAGS = $(FLAGS_DEBUG)
+FLAGS = $(FLAGS_NORMA)
+#FLAGS = $(FLAGS_DEBUG)
 
 # MPI: FUSE with MPI has been compiled successfully with mpif90 and mpiifort, use what is avaiable on your system
 # Note: override must be specifed to enable FC passed as argument to be overridden
