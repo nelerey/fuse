@@ -11,7 +11,7 @@ This page will guide you through the installation of FUSE. Before you get starte
 2. Edit the `Makefile` in `$(MASTER)/build/` by defining:
     * the name of the master directory (line 10),
     * the fortran compiler (lines 31-32, optional, we recommend that you define it when compiling the code, see 1. below),
-    * the path to the NetCDF and HDF libraries (`NCDF_PATH` and `HDF_PATH`, lines 40-52, see 3. above, only provide the paths associated with compiler you selected).
+    * the path to the NetCDF and HDF libraries (`NCDF_PATH` and `HDF_PATH`, lines 40-52, see 3. above, you need to provide the paths associated with compiler you selected).
 
 ## 2. Compile FUSE
 In spring 2020, we spruced up the FUSE Makefile. Until then, it used to require the separate compilation of the *shuffled complex evolution* (SCE, used for automated parameter estimation), as its code is in Fortran77. Now the SCE compilation is taken care of by the Makefile. To compile FUSE:
