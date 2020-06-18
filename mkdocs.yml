@@ -9,7 +9,7 @@ nav:
   - Installation and test cases:
       - Installation: 'install/install_fuse.md'
       - Test data: 'install/test_data.md'
-      - Test runs: 'install/test_runs.md'
+      - Test cases: 'install/test_cases.md'
   - Execution:
       - Overview: 'modes/overview.md'
       - Modelling decisions: 'modes/structure.md'
