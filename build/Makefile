@@ -249,7 +249,7 @@ endif
 FLAGS = $(FLAGS_NORMA)
 #FLAGS = $(FLAGS_DEBUG)
 
-# MPI: FUSE with MPI has been compiled successfully with mpif90 and mpiifort, use what is avaiable on your system
+# MPI: FUSE with MPI has been compiled successfully with mpif90 and mpiifort.
 # Note: override must be specifed to enable FC passed as argument to be overridden
 # https://www.gnu.org/software/make/manual/html_node/Override-Directive.html#Override-Directive
 
