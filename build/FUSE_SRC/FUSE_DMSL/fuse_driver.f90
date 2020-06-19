@@ -26,7 +26,7 @@ USE model_defnames                                        ! defines the integer 
 USE multiforce, ONLY: forcefile,vname_aprecip             ! model forcing structures
 USE multiforce, ONLY: AFORCE, aValid                      ! time series of lumped forcing/response data
 USE multiforce, ONLY: nspat1, nspat2                      ! grid dimensions
-USE multiforce, only: GRID_FLAG                          ! .true. if distributed
+USE multiforce, only: GRID_FLAG                           ! .true. if distributed
 USE multiforce, ONLY: GFORCE, GFORCE_3d                   ! spatial arrays of gridded forcing data
 USE multiforce, only: ancilF, ancilF_3d                   ! ancillary forcing data
 USE multiforce, ONLY: valDat                              ! response data
@@ -38,6 +38,7 @@ USE multiforce, only: numtim_sim, itim_sim                ! length of simulated 
 USE multiforce, only: numtim_sub, itim_sub                ! length of subperiod time series and associated index
 USE multiforce, only: sim_beg,sim_end                     ! timestep indices
 USE multiforce, only: eval_beg,eval_end                   ! timestep indices
+USE multiforce, only: SUB_PERIODS_FLAG                    ! .true. if subperiods are used to run FUSE
 USE multiforce, only: NUMPSET,name_psets                  ! number of parameter set and their names
 
 USE multiforce, only: ncid_forc                           ! NetCDF forcing file ID
@@ -70,6 +71,10 @@ USE model_numerix                                         ! defines decisions on
 
 ! access to model simulation modules
 USE fuse_rmse_module                                      ! run model and compute the root mean squared error
+
+#ifdef __MPI__
+use mpi
+#endif
 IMPLICIT NONE
 
 ! ---------------------------------------------------------------------------------------
@@ -146,6 +151,25 @@ INTEGER(I4B)                           :: ISCE    ! unit number for SCE write
 REAL(MSP)                              :: FUNCTN  ! function name for the model run
 
 ! ---------------------------------------------------------------------------------------
+! MPI variables
+! ---------------------------------------------------------------------------------------
+integer ( kind = 4 ) mpi_error_value
+integer ( kind = 4 ) mpi_process
+integer ( kind = 4 ) mpi_nprocesses
+
+! ---------------------------------------------------------------------------------------
+! Initialize MPI
+! ---------------------------------------------------------------------------------------
+#ifdef __MPI__
+call MPI_Init(mpi_error_value)
+call MPI_Comm_size(MPI_COMM_WORLD, mpi_nprocesses, mpi_error_value) ! determine the number of processes involved in a communicator (mpi_nproccesses)
+call MPI_Comm_rank(MPI_COMM_WORLD, mpi_process, mpi_error_value) !  determine the rank of the process in the particular communicator’s group.
+#else
+mpi_process = 0
+mpi_nprocesses = 1
+#endif
+
+! ---------------------------------------------------------------------------------------
 ! READ COMMAND LINE ARGUMENTS
 ! ---------------------------------------------------------------------------------------
 ! read command-line arguments
@@ -163,7 +187,7 @@ IF(TRIM(fuse_mode).EQ.'run_pre')THEN
 ENDIF
 
 ! print command-line arguments
-print*, '1st command-line argument (DatString) = ', trim(DatString)
+print*, '1st command-line argument (fileManager) = ', trim(DatString)
 print*, '2nd command-line argument (dom_id) = ', trim(dom_id)
 print*, '3rd command-line argument (fuse_mode) = ', fuse_mode
 IF(TRIM(fuse_mode).EQ.'run_pre')THEN
@@ -214,7 +238,9 @@ if(err/=0)then; write(*,*) trim(message); stop; endif
 ! determine period over which to run and evaluate FUSE and their associated indices
 CALL GET_TIME_INDICES()
 
-! allocate space for the basin-average time series
+IF((.NOT.GRID_FLAG).AND.SUB_PERIODS_FLAG)THEN; write(*,*) 'Error: in catchment mode, FUSE must run over entire time series at once, please set numtim_sub to -9999 in the filemanager (', trim(DatString),').'; stop; endif
+
+! allocate space for the basin/grid-average time series
 allocate(aForce(numtim_sub),aRoute(numtim_sub),stat=err)
 !allocate(aForce(numtim_sub),aRoute(numtim_sub),aValid(numtim_sub),stat=err)
 if(err/=0)then; write(*,*) 'unable to allocate space for basin-average time series [aForce,aRoute]'; stop; endif
@@ -264,8 +290,13 @@ PCOUNT=0                 ! counter for parameter sets evaluated (shared in MODUL
 IF(fuse_mode == 'run_def')THEN ! run FUSE with default parameter values
 
   ! files to which model run and parameter set will be saved
+#ifdef __MPI__
+  write(FNAME_NETCDF_RUNS, "(A,I0.5,A)") TRIM(OUTPUT_PATH)//TRIM(dom_id)//'_'//TRIM(FMODEL_ID)//'_runs_def_', mpi_process, ".nc"
+  write(FNAME_NETCDF_PARA, "(A,I0.5,A)") TRIM(OUTPUT_PATH)//TRIM(dom_id)//'_'//TRIM(FMODEL_ID)//'_para_def_', mpi_process, ".nc"
+#else
   FNAME_NETCDF_RUNS = TRIM(OUTPUT_PATH)//TRIM(dom_id)//'_'//TRIM(FMODEL_ID)//'_runs_def.nc'
   FNAME_NETCDF_PARA = TRIM(OUTPUT_PATH)//TRIM(dom_id)//'_'//TRIM(FMODEL_ID)//'_para_def.nc'
+#endif
 
   NUMPSET=1  ! only the default parameter set is run
   ALLOCATE(name_psets(NUMPSET))
@@ -479,6 +510,10 @@ PRINT *, 'Closing output file'
 err = nf90_close(ncid_out)
 !if (err.ne.0) write(*,*) trim(message); if (err.gt.0) stop
 PRINT *, 'Done'
+
+#ifdef __MPI__
+call MPI_Finalize(mpi_error_value)
+#endif
 
 STOP
 END PROGRAM DISTRIBUTED_DRIVER
