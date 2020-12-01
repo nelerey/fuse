@@ -23,14 +23,12 @@ EXE_PATH = $(F_MASTER)bin/
 #========================================================================
 
 # Define the fortran compiler. You have a few options: i) set the FC
-# variable is set in your environment, ii) set it when you compile this
-# Make file (make FC=gfortran), iii) or if don't define it, the compiler
-# defined below is used
+# variable in your environment, ii) set it when you compile this
+# Make file (e.g. make FC=ifort), iii) or if don't define it, the compiler
+# specified below is used
 ifndef FC
-
 	#FC = ifort
 	FC = gfortran
-
 endif
 
 # Define the NetCDF and HDF5 libraries. Use the libraries associated with
@@ -38,17 +36,13 @@ endif
 # - consider asking the person in charge of your machine where the libraries are
 # installed. The folders should contain a lib directory - see LIBRARIES below.
 ifeq "$(FC)" "ifort"
-
 	NCDF_PATH = ${ISCA_NCDF_PATH_ifort}
 	HDF_PATH  = ${ISCA_HDF_PATH_ifort}
-
 endif
 
 ifeq "$(FC)" "gfortran"
-
 	NCDF_PATH = ${ISCA_NCDF_PATH_gfort}
 	HDF_PATH  = ${ISCA_HDF_PATH_gfort}
-
 endif
 
 LIBRARIES = -L$(NCDF_PATH)/lib -lnetcdff -lnetcdf -L$(HDF_PATH)/lib -lhdf5_hl -lhdf5
