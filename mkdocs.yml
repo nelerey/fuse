@@ -12,7 +12,6 @@ nav:
       - Test cases: 'install/test_cases.md'
   - Execution:
       - Overview: 'modes/overview.md'
-      - Modelling decisions: 'modes/structure.md'
       - Model structure: 'modes/structure.md'
       - Parameter estimation modes: 'modes/execution_modes.md'
       - Spatial modes: 'modes/spatial_modes.md'

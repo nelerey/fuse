@@ -1,7 +1,7 @@
 ## Data for two spatial configurations
 
-To get you started with FUSE, we provide data for two test cases. They will enable you to test FUSE in its two spatial configurations: FUSE can be run for an individual catchment or on a grid (see [Execution modes](../../../execution_modes/)).
-Download the data for the two test cases in order to [test FUSE](/install/test_runs/).
+To get you started with FUSE, we provide data for two test cases. They will enable you to test FUSE in its two spatial configurations: FUSE can be run for an individual catchment or on a grid (see [Spatial modes](/modes/spatial_modes/)).
+Download the data for the two test cases in order to [test FUSE](/install/test_cases/).
 
 ## Catchment test case
 

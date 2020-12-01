@@ -14,7 +14,8 @@ If FUSE runs and terminates with `Done`, it is good sign. We will make simulatio
 
 ## Run FUSE for the grid test case
 
-1. If you haven't yet, download the data for the [grid test case](https://dl.dropboxusercontent.com/s/f6omcgz8hsirlr0/fuse_catch.zip?dl=0) to a directory `$(data_grid)`.
+1. If you haven't yet, download the data for the [grid test case](
+https://dl.dropboxusercontent.com/s/g5193e0n01ao33d/fuse_grid.zip?dl=0) to a directory `$(data_grid)`.
 1. Update the lines 3 to 5 of `fm_grid.txt` (this is the file manager) using the path of the `$(data_grid)`.
 1. Run FUSE using default parameter values (note `run_def` below):
 
