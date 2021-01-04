@@ -13,7 +13,7 @@ nav:
   - Execution:
       - Overview: 'modes/overview.md'
       - Model structure: 'modes/structure.md'
-      - Parameter estimation modes: 'modes/execution_modes.md'
+      - Parameter modes: 'modes/execution_modes.md'
       - Spatial modes: 'modes/spatial_modes.md'
       - Numerical methods: 'modes/numerical_methods.md'
   - Files:
