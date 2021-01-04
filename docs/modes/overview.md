@@ -4,7 +4,7 @@ Running a hydrological model means making a wide range of decisions, which will 
 
 **Model structure** FUSE is a master template for model generation. It enables users to create and run their own model structures by combining pre-existing modules - see the [Model structure section](/modes/structure).
 
-**Parameter estimation** The parameters of any FUSE structure can be estimated in different ways. One can for instance decide to use default parameter values or to run a calibration algorithm - the different options are described in the [Parameter estimation section](/modes/execution_modes).
+**Parameter estimation** The parameters of any FUSE structure can be estimated in different ways. One can for instance decide to use default parameter values or to run a calibration algorithm - the different options are described in the [Parameter modes section](/modes/execution_modes).
 
 **Spatial configuration** Any FUSE model structure can be run either for individual catchments or on a grid - see the [Spatial modes section](/modes/spatial_modes).
 
