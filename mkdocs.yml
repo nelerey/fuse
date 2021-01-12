@@ -25,5 +25,6 @@ nav:
       - Precipitation: 'modules/1_precip.md'
   - Extras:
       - MPI: 'extras/mpi.md'
+      - mizuRoute for FUSE: 'extras/mizuRoute.md'
       - Tools for FUSE: 'extras/tofu.md'
       - CAMELS for FUSE: 'extras/camels_for_fuse.md'
