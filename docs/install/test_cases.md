@@ -1,8 +1,8 @@
 ## Run FUSE for the catchment test case
 
-The steps below will enable you to test if FUSE is running as expected. The instructions below were purposefully kept short, but each element is described in detail in the rest of the documentation.
+The steps below will enable you to test if FUSE is running as expected. The instructions were purposefully kept short, but their elements are described in more detail in the rest of the documentation.
 
-1. If you haven't yet, download the data for the [catchment test case](https://dl.dropboxusercontent.com/s/f6omcgz8hsirlr0/fuse_catch.zip?dl=0) to a directory `$(data_catch)`.
+1. If you haven't yet, download the data for the [catchment test case](/install/test_data) to a directory `$(data_catch)`.
 1. Update the lines 3 to 5 of `fm_catch.txt` (this is the file manager) using the path of `$(data_catch)`.
 1. Run FUSE using default parameter values (note `run_def` below):
 
@@ -10,17 +10,16 @@ The steps below will enable you to test if FUSE is running as expected. The inst
 ./fuse.exe path_to_data_catch/fm_catch.txt us_09066300 run_def
 ```
 
-If FUSE runs and terminates with `Done`, it is good sign. We will make simulations available that you can compare to your own simulations.
+If FUSE runs and terminates with `Done`, it is good sign. Explore the files just created in the `output` folder and maybe compare them with those in `output_ref`, which we created.
 
 ## Run FUSE for the grid test case
 
-1. If you haven't yet, download the data for the [grid test case](
-https://dl.dropboxusercontent.com/s/g5193e0n01ao33d/fuse_grid.zip?dl=0) to a directory `$(data_grid)`.
-1. Update the lines 3 to 5 of `fm_grid.txt` (this is the file manager) using the path of the `$(data_grid)`.
-1. Run FUSE using default parameter values (note `run_def` below):
+1. If you haven't yet, download the data for the [grid test case](/install/test_data) to a directory `$(data_grid)`.
+1. Update the lines 3 to 5 of `fm_grid.txt` using the path of `$(data_grid)`.
+1. Run FUSE using default parameter values over the grid:
 
 ```
 ./fuse.exe path_to_data_grid/fm_grid.txt cesm1-cam5 run_def
 ```
 
-If FUSE runs and terminates with `Done`, it is a good sign. We will make simulations available that you can compare to your own simulations.
+If FUSE runs and terminates with `Done`, it is good sign. Explore the files just created in the `output` folder and maybe compare them with those in `output_ref`, which we created.

@@ -18,6 +18,6 @@ In spring 2020, we spruced up the FUSE Makefile. Until then, it used to require 
 
 1. Change directory to `$(MASTER)/build/` and compile FUSE by typing `make FC=ifort` (or `make FC=gfortran` if you prefer to use `gfortran`).
 
-2. Try running FUSE by typing `./fuse.exe`. If the output is `1st command-line argument is missing (fileManager)`, you have probably compiled FUSE correctly. But there might still be issues related to the libraries. To find out, download the [test data](/install/test_data/) and run the [test cases](/install/test_cases/).
+2. Try running FUSE by typing `./fuse.exe`. If the output is `1st command-line argument is missing (fileManager)`, you have probably compiled FUSE correctly. But there might still be issues related to the libraries. To find out, download the [test data](../test_data/) and run the [test cases](../test_cases/).
 
 <a id="infile_file_formats"></a>
