@@ -1,6 +1,30 @@
-site_name: FUSE Manual
+site_name: FUSE manual
+repo_url: https://github.com/naddor/fuse
+docs_dir: docs
+theme:
+  name: readthedocs
+  nav_style: dark
 nav:
   - Home: index.md
-  - Input/Output:
-    - FUSE Input: 'input_output/FUSE_input.md'
-theme: readthedocs
+  - Installation and test cases:
+      - Installation: 'install/install_fuse.md'
+      - Test data: 'install/test_data.md'
+      - Test cases: 'install/test_cases.md'
+  - Execution:
+      - Overview: 'modes/overview.md'
+      - Model structure: 'modes/structure.md'
+      - Parameter modes: 'modes/execution_modes.md'
+      - Spatial modes: 'modes/spatial_modes.md'
+      - Numerical methods: 'modes/numerical_methods.md'
+  - Files:
+      - File manager: 'files/file_manager.md'
+      - Input files: 'files/input_files.md'
+      - Settings files: 'files/settings_files.md'
+      - Output files: 'files/output_files.md'
+  - Modules:
+      - Precipitation: 'modules/1_precip.md'
+  - Extras:
+      - MPI: 'extras/mpi.md'
+      - mizuRoute for FUSE: 'extras/mizuRoute.md'
+      - Tools for FUSE: 'extras/tofu.md'
+      - CAMELS for FUSE: 'extras/camels_for_fuse.md'

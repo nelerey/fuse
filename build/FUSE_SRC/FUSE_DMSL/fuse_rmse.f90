@@ -1,4 +1,4 @@
-MODULE FUSE_RMSE_MODULE  ! have as a module because of dynamic arrays
+MODULE FUSE_RMSE_MODULE
   IMPLICIT NONE
   CONTAINS
   SUBROUTINE FUSE_RMSE(XPAR,GRID_FLAG,NCID_FORC,RMSE,OUTPUT_FLAG,IPSET,MPARAM_FLAG)
@@ -14,7 +14,7 @@ MODULE FUSE_RMSE_MODULE  ! have as a module because of dynamic arrays
     ! --------
     ! Calculate the RMSE for single FUSE model and single parameter set
     !   input: model parameter set
-    !  output: root mean squared error
+    !   output: root mean squared error
     ! ---------------------------------------------------------------------------------------
 
     USE nrtype                                               ! variable types, etc.
@@ -45,8 +45,7 @@ MODULE FUSE_RMSE_MODULE  ! have as a module because of dynamic arrays
     USE set_all_module
 
     ! code modules
-    USE time_io, ONLY:get_modtim                   ! get model time for a given time step
-    USE get_gforce_module, ONLY:get_gforce                   ! get gridded forcing data for a given time step
+    USE time_io, ONLY:get_modtim                             ! get model time for a given time step
     USE get_gforce_module, ONLY:get_gforce_3d                ! get gridded forcing data for a range of time steps
     USE getPETgrid_module, ONLY:getPETgrid                   ! get gridded PET
     USE par_insert_module                                    ! insert parameters into data structures
@@ -76,7 +75,6 @@ MODULE FUSE_RMSE_MODULE  ! have as a module because of dynamic arrays
     ! internal
     LOGICAL(lgt),PARAMETER                 :: computePET=.FALSE. ! flag to compute PET
     REAL(SP)                               :: T1,T2          ! CPU time
-    !  INTEGER(I4B)                        :: ITIM           ! loop through time series
     INTEGER(I4B)                           :: iSpat1,iSpat2  ! loop through spatial dimensions
     INTEGER(I4B)                           :: ibands         ! loop through elevation bands
     INTEGER(I4B)                           :: IPAR           ! loop through model parameters
@@ -99,7 +97,8 @@ MODULE FUSE_RMSE_MODULE  ! have as a module because of dynamic arrays
     ! allocate state vectors
     ALLOCATE(STATE0(NSTATE),STATE1(NSTATE),STAT=IERR)
     IF (IERR.NE.0) STOP ' problem allocating space for state vectors in fuse_rmse '
-    ! increment parameter counter for model output (shared in module MULTISTATS)
+
+    ! increment parameter counter for model output
     IF (.NOT.PRESENT(MPARAM_FLAG)) THEN
        PCOUNT = PCOUNT + 1
     ELSE
@@ -110,32 +109,28 @@ MODULE FUSE_RMSE_MODULE  ! have as a module because of dynamic arrays
     CALL PUT_PARSET(XPAR)
     PRINT *, 'Parameter set added to data structure:'
     PRINT *, XPAR
-    !DO IPAR=1,NUMPAR; WRITE(*,'(A11,1X,F9.3)') LPARAM(IPAR), XPAR(IPAR); END DO
 
     ! compute derived model parameters (bucket sizes, etc.)
     CALL PAR_DERIVE(ERR,MESSAGE)
     IF (ERR.NE.0) WRITE(*,*) TRIM(MESSAGE); IF (ERR.GT.0) STOP
 
-    ! initialize model states over the 2D gridded domain
+    ! initialize model states over the 2D gridded domain (1x1 domain in catchment mode)
     DO iSpat2=1,nSpat2
       DO iSpat1=1,nSpat1
-          CALL INIT_STATE(fracState0)             ! define FSTATE - fracState0 is shared in MODULE multistate
-          !gState(iSpat1,iSpat2) = FSTATE         ! put the state into the 2-d structure
-          gState_3d(iSpat1,iSpat2,1) = FSTATE     ! put the state into the 3_d structure
+          CALL INIT_STATE(fracState0)             ! define FSTATE using fracState0
+          gState_3d(iSpat1,iSpat2,1) = FSTATE     ! put the state into first time step of 3D structure
        END DO
     END DO
     PRINT *, 'Model states initialized over the 2D gridded domain'
 
-    ! initialize elevations bands if snow module is on - see init_state.f90 for catchment-scale modeling
-    ! IF (SMODL%iSNOWM.EQ.iopt_temp_index .AND. SPATIAL_OPTION == LUMPED) THEN
-
+    ! initialize elevations bands if snow module is on
     PRINT *, 'N_BANDS =', N_BANDS
 
     IF (SMODL%iSNOWM.EQ.iopt_temp_index) THEN
       DO iSpat2=1,nSpat2
         DO iSpat1=1,nSpat1
          DO IBANDS=1,N_BANDS
-            MBANDS_VAR_4d(iSpat1,iSpat2,IBANDS,1)%SWE=0.0_sp            ! band snowpack water equivalent (mm)
+            MBANDS_VAR_4d(iSpat1,iSpat2,IBANDS,1)%SWE=0.0_sp         ! band snowpack water equivalent (mm)
             MBANDS_VAR_4d(iSpat1,iSpat2,IBANDS,1)%SNOWACCMLTN=0.0_sp ! new snow accumulation in band (mm day-1)
             MBANDS_VAR_4d(iSpat1,iSpat2,IBANDS,1)%SNOWMELT=0.0_sp    ! snowmelt in band (mm day-1)
             MBANDS_VAR_4d(iSpat1,iSpat2,IBANDS,1)%DSWE_DT=0.0_sp     ! rate of change of band SWE (mm day-1)
@@ -145,22 +140,34 @@ MODULE FUSE_RMSE_MODULE  ! have as a module because of dynamic arrays
       PRINT *, 'Snow states initiatlized over the 2D gridded domain '
     ENDIF
 
-    ! allocate 3d data structures for fluxes
+    ! allocate 3d data structure for fluxes
     ALLOCATE(W_FLUX_3d(nspat1,nspat2,numtim_sub))
 
     ! initialize model time step
-    DT_SUB  = DELTIM                       ! init stepsize to full step (DELTIM shared in module multiforce)
-    DT_FULL = DELTIM                       ! init stepsize to full step (DELTIM shared in module multiforce)
+    DT_SUB  = DELTIM                       ! init stepsize to full step
+    DT_FULL = DELTIM                       ! init stepsize to full step
 
     ! initialize summary statistics
     CALL INIT_STATS()
     CALL CPU_TIME(T1)
 
-    ! initialize indices and subperiod counter
+    ! This version of FUSE enables the user to load slices of the forcing
+    ! - FUSE1 used to access the input file at each time step, slowing operations
+    ! down over large domains on systems with slow I/O. The number of timesteps
+    ! of the slices is defined by the user in the filemanager. The default is
+    ! that the whole time period needed for the simulation is loaded, but
+    ! this can exceed memory capacity when large domains are processed.
+    ! To overcome this, a subperiod (slice) of the forcing can be loaded in
+    ! memory and used to run FUSE. Then, the results are saved to the
+    ! output file, and the next slice of forcing is loaded. This enables FUSE to
+    ! run quicker than when forcing is loaded at each time step and grid point,
+    ! while also controlling memory usage.
+
+    ! initialise time indices for whole simulation and subperiod
     itim_sub = 1
     itim_sim = 1
 
-    ! loop through time
+    ! loop through time steps of the input file (ITIM_IN)
     DO ITIM_IN=sim_beg,sim_end
 
       ! if start of subperiod: load forcing
@@ -169,6 +176,7 @@ MODULE FUSE_RMSE_MODULE  ! have as a module because of dynamic arrays
         ! determine length of current subperiod
         numtim_sub_cur=MIN(numtim_sub,numtim_sim-itim_sim+1)
 
+        ! load forcing for desired period into gForce_3d
         PRINT *, 'New subperiod: loading forcing for ',numtim_sub_cur,' time steps'
         CALL get_gforce_3d(itim_in,numtim_sub_cur,ncid_forc,err,message)
         IF(err/=0)THEN; WRITE(*,*) 'Error while extracting 3d forcing'; STOP; ENDIF
@@ -184,33 +192,37 @@ MODULE FUSE_RMSE_MODULE  ! have as a module because of dynamic arrays
       IF(computePET) CALL getPETgrid(ierr,cmessage)
       IF(ierr/=0)THEN; PRINT*, TRIM(cmessage); STOP; ENDIF
 
-      ! loop through grid points, and run the model for one time step
+      ! loop through grid points and run the model for one time step
       DO iSpat2=1,nSpat2
         DO iSpat1=1,nSpat1
 
-            ! NOTE: MFORCE, MSTATE, MBANDS and MFLUX are all scalars, i.e. have zero dimension
-            ! MFORCE and MSTATE are initialized using 3d data structures, then FUSE is run, then the
-            ! the output is stored in 3d data structures
-
-            ! extract forcing data
-            MFORCE = gForce_3d(iSpat1,iSpat2,itim_sub)      ! assign model forcing data
-
-            ! only run FUSE for grid points in domain and for which forcing available
-            !IF(abs(NA_VALUE-elev_mask(iSpat1,iSpat2))>0.1.AND.abs(NA_VALUE-MFORCE%temp)>0.1)THEN
+            ! only run FUSE for grid points within domain defined by elev_mask
             IF(.NOT.elev_mask(iSpat1,iSpat2))THEN
 
-               ! extract model states
-               MSTATE = gState_3d(iSpat1,iSpat2,itim_sub)      ! refresh model states
-               FSTATE = gState_3d(iSpat1,iSpat2,itim_sub)      ! refresh model states
+              ! FUSE works with MFORCE, MSTATE, MBANDS, W_FLUX, MROUTE, which are all scalars.
+              ! Here we transfer forcing, state, flux variables from the 3D structures to these
+              ! variables, run FUSE and then transfer the new values back to the 3D structures.
 
-               ! get the vector of model states from the structure
-               !CALL STR_2_XTRY(FSTATE,STATE0)      ! state at the start of the time step (STATE0) set using FSTATE
-               CALL STR_2_XTRY(gState_3d(iSpat1,iSpat2,itim_sub),STATE0)      ! state at the start of the time step (STATE0) set using FSTATE
+              ! extract forcing for this grid cell and time step
+              MFORCE = gForce_3d(iSpat1,iSpat2,itim_sub)
+
+              ! forcing sanity checks
+              if(MFORCE%PPT.lt.0.0) then; PRINT *, 'Negative precipitation in input file:',iSpat1,iSpat2,MFORCE%PPT; stop; endif
+              if(MFORCE%PPT.gt.5000.0) then; PRINT *, 'Precipitation greater than 5000 in input file:',iSpat1,iSpat2,MFORCE%PPT; stop; endif
+              if(MFORCE%PET.lt.0.0) then; PRINT *, 'Negative PET in input file'; stop; endif
+              if(MFORCE%PET.gt.100.0) then; PRINT *, 'PET greater than 100 in input file'; stop; endif
+              if(MFORCE%TEMP.lt.-100.0) then; PRINT *, 'Temperature lower than -100 in input file'; stop; endif
+              if(MFORCE%TEMP.gt.100.0) then; PRINT *, 'Temperature greater than 100 in input file'; stop; endif
+
+               ! extract model states for this grid cell and time step
+               FSTATE = gState_3d(iSpat1,iSpat2,itim_sub)
+               MSTATE = FSTATE                     ! refresh model states
+               CALL STR_2_XTRY(FSTATE,STATE0)      ! set state at the start of the time step (STATE0) using FSTATE
 
                ! initialize model fluxes
                CALL INITFLUXES()                   ! set weighted sum of fluxes to zero
 
-               ! if snow model, call UPDATE_SWE first to calculate snow fluxes and update snow bands
+               ! if snow model is on, call UPDATE_SWE to calculate snow fluxes and update snow bands
                ! using explicit Euler approach; if not, call QRAINERROR
                SELECT CASE(SMODL%iSNOWM)
                CASE(iopt_temp_index)
@@ -240,28 +252,35 @@ MODULE FUSE_RMSE_MODULE  ! have as a module because of dynamic arrays
               ! perform overland flow routing
               CALL Q_OVERLAND()
 
-              ! sanity check
-              IF (MROUTE%Q_ROUTED.LT.0._sp) STOP ' Q_ROUTED is less than zero '
-              IF (MROUTE%Q_ROUTED.GT.1000._sp) STOP ' Q_ROUTED is enormous '
+              ! runoff sanity check
+              IF (MROUTE%Q_ROUTED.LT.0._sp) STOP 'Q_ROUTED is less than zero'
+              IF (MROUTE%Q_ROUTED.GT.1000._sp) STOP 'Q_ROUTED is enormous'
 
-              ! save the state
-              CALL XTRY_2_STR(STATE1,FSTATE)            ! update FSTATE using states at the end of the time step (STATE0)
-              gState_3d(iSpat1,iSpat2,itim_sub+1) = FSTATE      ! put the state into the 3-d structure
-              W_FLUX_3d(iSpat1,iSpat2,itim_sub) = W_FLUX
-              AROUTE_3d(iSpat1,iSpat2,itim_sub) = MROUTE      ! save instantaneous and routed runoff
+              ! transfer simulations to corresponding 3D structures
+              ! note that the first time step of gState_3d and MBANDS_VAR_4d is defined by initialisation
+              ! or simulation over previous subperiod, so saving in itim_sub+1 - and hence, the allocated
+              ! length of the temporal dimension of gState_3d and MBANDS_VAR_4d is numtim_sub+1,
+              ! but numtim_sub for W_FLUX_3d and AROUTE_3d
+
+              CALL XTRY_2_STR(STATE1,FSTATE)                ! update FSTATE using states at the end of the time step (STATE1)
+              gState_3d(iSpat1,iSpat2,itim_sub+1) = FSTATE  ! transfer FSTATE into the 3-d structure
+              W_FLUX_3d(iSpat1,iSpat2,itim_sub) = W_FLUX    ! fluxes
+              AROUTE_3d(iSpat1,iSpat2,itim_sub) = MROUTE    ! instantaneous and routed runoff
 
               IF (SMODL%iSNOWM.EQ.iopt_temp_index) THEN
 
-                 gState_3d(iSpat1,iSpat2,itim_sub+1)%SWE_TOT = SUM(MBANDS%SWE*MBANDS_INFO_3d(iSpat1,iSpat2,:)%AF) ! weighted average of SWE over all the elevation bands
+                ! SWE TOT: weighted average of SWE over all the elevation bands
+                gState_3d(iSpat1,iSpat2,itim_sub+1)%SWE_TOT = SUM(MBANDS%SWE*MBANDS_INFO_3d(iSpat1,iSpat2,:)%AF)
 
-                 MBANDS_VAR_4d(iSpat1,iSpat2,:,itim_sub+1)%SWE         = MBANDS%SWE          ! update MBANDS_VAR_4D
-                 MBANDS_VAR_4d(iSpat1,iSpat2,:,itim_sub+1)%SNOWACCMLTN = MBANDS%SNOWACCMLTN  !
-                 MBANDS_VAR_4d(iSpat1,iSpat2,:,itim_sub+1)%SNOWMELT    = MBANDS%SNOWMELT     !
-                 MBANDS_VAR_4d(iSpat1,iSpat2,:,itim_sub+1)%DSWE_DT     = MBANDS%DSWE_DT      !
+                ! update MBANDS_VAR_4D
+                MBANDS_VAR_4d(iSpat1,iSpat2,:,itim_sub+1)%SWE         = MBANDS%SWE
+                MBANDS_VAR_4d(iSpat1,iSpat2,:,itim_sub+1)%SNOWACCMLTN = MBANDS%SNOWACCMLTN
+                MBANDS_VAR_4d(iSpat1,iSpat2,:,itim_sub+1)%SNOWMELT    = MBANDS%SNOWMELT
+                MBANDS_VAR_4d(iSpat1,iSpat2,:,itim_sub+1)%DSWE_DT     = MBANDS%DSWE_DT
 
               END IF
 
-              ! save forcing data
+              ! save forcing data to export to output file
               IF(GRID_FLAG)THEN
                  aForce(itim_sub)%ppt = SUM(gForce_3d(:,:,itim_sub)%ppt)/REAL(SIZE(gForce_3d(:,:,itim_sub)), KIND(sp))
                  aForce(itim_sub)%pet = SUM(gForce_3d(:,:,itim_sub)%pet)/REAL(SIZE(gForce_3d(:,:,itim_sub)), KIND(sp))
@@ -281,11 +300,11 @@ MODULE FUSE_RMSE_MODULE  ! have as a module because of dynamic arrays
               CALL SET_ROUTE(NA_VALUE_SP)
               AROUTE_3d(iSpat1,iSpat2,itim_sub) = MROUTE
 
-           ENDIF ! (is forcing available for this grid cell?)
+           ENDIF ! (is grid cell in mask_elev?)
         END DO  ! (looping thru 2nd spatial dimension)
       END DO  ! (looping thru 1st spatial dimension)
 
-      ! if end of subperiod: move state of last time step to first and flush memory
+      ! if end of subperiod: write to output file and save states
       IF(itim_sub.EQ.numtim_sub_cur)THEN
 
         PRINT *, 'End of subperiod reached:'
@@ -294,28 +313,19 @@ MODULE FUSE_RMSE_MODULE  ! have as a module because of dynamic arrays
         IF (OUTPUT_FLAG) THEN
           PRINT *, 'Write output for ',numtim_sub_cur,' time steps starting at indice', itim_sim-numtim_sub_cur+1
           CALL PUT_GOUTPUT_3D(itim_sim-numtim_sub_cur+1,itim_in-numtim_sub_cur+1,numtim_sub_cur,IPSET)
-          PRINT *, 'PUT_GOUTPUT_3D', itim_sim-numtim_sub_cur+1, '-' , itim_in-numtim_sub_cur+1,'-',numtim_sub_cur,'-',IPSET
-
           PRINT *, 'Done writing output'
         ELSE
           PRINT *, 'OUTPUT_FLAG is set on FALSE, no output written'
         END IF
 
-        ! TODO: reinitialize gState_3d and MBANDS_VAR_4d instead of overwritting them
+        ! TODO: set gState_3d and MBANDS_VAR_4d to NA
 
-        ! reinitialize states
-        !CALL XTRY_2_STR(STATE1,FSTATE)               ! update FSTATE using states at the end of the time step (STATE0)
-        gState_3d(:,:,1) = gState_3d(:,:,itim_sub+1)  ! put the state into the 3-d structure
-        !W_FLUX_3d(iSpat1,iSpat2,1) = W_FLUX
-        !AROUTE_3d(iSpat1,iSpat2,1) = MROUTE
-         MBANDS_VAR_4d(:,:,:,1)%SWE         = MBANDS_VAR_4d(:,:,:,itim_sub+1)%SWE
-         MBANDS_VAR_4d(:,:,:,1)%SNOWACCMLTN = MBANDS_VAR_4d(:,:,:,itim_sub+1)%SNOWACCMLTN
-         MBANDS_VAR_4d(:,:,:,1)%SNOWMELT    = MBANDS_VAR_4d(:,:,:,itim_sub+1)%SNOWMELT
-         MBANDS_VAR_4d(:,:,:,1)%DSWE_DT     = MBANDS_VAR_4d(:,:,:,itim_sub+1)%DSWE_DT
-
-         ! save fluxes instantaneous and routed runoff
-         W_FLUX_3d(:,:,1) =  W_FLUX_3d(:,:,itim_sub)
-         AROUTE_3d(:,:,1) =  AROUTE_3d(:,:,itim_sub)
+        ! reinitialize states for next subperiod using last time step
+        gState_3d(:,:,1) = gState_3d(:,:,itim_sub+1)
+        MBANDS_VAR_4d(:,:,:,1)%SWE         = MBANDS_VAR_4d(:,:,:,itim_sub+1)%SWE
+        MBANDS_VAR_4d(:,:,:,1)%SNOWACCMLTN = MBANDS_VAR_4d(:,:,:,itim_sub+1)%SNOWACCMLTN
+        MBANDS_VAR_4d(:,:,:,1)%SNOWMELT    = MBANDS_VAR_4d(:,:,:,itim_sub+1)%SNOWMELT
+        MBANDS_VAR_4d(:,:,:,1)%DSWE_DT     = MBANDS_VAR_4d(:,:,:,itim_sub+1)%DSWE_DT
 
         ! reset itim_sub
         itim_sub=1
@@ -327,34 +337,32 @@ MODULE FUSE_RMSE_MODULE  ! have as a module because of dynamic arrays
 
       END IF
 
-      ! increment itim_sim
-      itim_sim=itim_sim+1
+    ! increment itim_sim
+    itim_sim=itim_sim+1
 
-      END DO  ! (itim)
+    END DO  ! (loop through timesteps)
 
-      ! get timing information
-      CALL CPU_TIME(T2)
-      WRITE(*,*) "TIME ELAPSED = ", t2-t1
+    ! get timing information
+    CALL CPU_TIME(T2)
+    WRITE(*,*) "TIME ELAPSED = ", t2-t1
 
-      ! calculate mean summary statistics
-      IF(.NOT.GRID_FLAG)THEN
+    ! calculate mean summary statistics
+    IF(.NOT.GRID_FLAG)THEN
 
-        PRINT *, 'Calculating performance metrics...'
-        CALL MEAN_STATS()
-        RMSE = MSTATS%RAW_RMSE
-        PRINT *, 'RMSE = ', RMSE
+      PRINT *, 'Calculating performance metrics...'
+      CALL MEAN_STATS()
+      RMSE = MSTATS%RAW_RMSE
 
-      ENDIF
+    ENDIF
 
-      PRINT *, 'Writing parameter values...'
-      CALL PUT_PARAMS(PCOUNT)
-      PRINT *, 'Writing model statistics...'
-      CALL PUT_SSTATS(PCOUNT)
+    PRINT *, 'Writing parameter values...'
+    CALL PUT_PARAMS(PCOUNT)
+    PRINT *, 'Writing model statistics...'
+    CALL PUT_SSTATS(PCOUNT)
 
-      ! deallocate state vectors
-      DEALLOCATE(W_FLUX_3d)
+    ! deallocate vectors
+    DEALLOCATE(W_FLUX_3d); IF (IERR.NE.0) STOP ' problem deallocating W_FLUX_3d in fuse_rmse '
+    DEALLOCATE(STATE0,STATE1,STAT=IERR); IF (IERR.NE.0) STOP ' problem deallocating state vectors in fuse_rmse '
 
-      DEALLOCATE(STATE0,STATE1,STAT=IERR); IF (IERR.NE.0) STOP ' problem deallocating state vectors in fuse_rmse '
-      ! ---------------------------------------------------------------------------------------
-      END SUBROUTINE FUSE_RMSE
-      END MODULE FUSE_RMSE_MODULE
+  END SUBROUTINE FUSE_RMSE
+END MODULE FUSE_RMSE_MODULE

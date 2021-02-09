@@ -51,8 +51,8 @@ MODULE multiforce
   TYPE(FDATA)                           :: MFORCE     ! model forcing data for a single time step
   TYPE(fData), DIMENSION(:,:), POINTER  :: gForce     ! model forcing data for a 2-d grid
   TYPE(aData), DIMENSION(:,:), POINTER  :: ancilF     ! ancillary forcing data for the 2-d grid
-  TYPE(fData), DIMENSION(:,:,:), POINTER  :: gForce_3d  ! model forcing data for a 3-d grid - let's add time
-  TYPE(aData), DIMENSION(:,:,:), POINTER  :: ancilF_3d  ! ancillary forcing data for the 3-d grid - because time is timeless
+  TYPE(fData), DIMENSION(:,:,:), POINTER  :: gForce_3d  ! model forcing data for a 3-d grid (time as 3rd dimension)
+  TYPE(aData), DIMENSION(:,:,:), POINTER  :: ancilF_3d  ! ancillary forcing data for the 3-d grid
 
   ! timing information - note that numtim_in >= numtim_sim >= numtim_sub
   CHARACTER(len=20)                     :: date_start_input          ! date start input time series
@@ -75,9 +75,13 @@ MODULE multiforce
   REAL(sp)                              :: jdayRef                   ! reference time (days)
   REAL(sp)                              :: deltim=-1._dp             ! length of time step (days)
 
+  LOGICAL(LGT)                          :: SUB_PERIODS_FLAG          ! .true. if subperiods are used to run FUSE
+
   ! dimension information
+  INTEGER(i4b)                          :: startSpat2=-1             ! number of points in 1st spatial dimension
   INTEGER(i4b)                          :: nSpat1=-1                 ! number of points in 1st spatial dimension
   INTEGER(i4b)                          :: nSpat2=-1                 ! number of points in 2nd spatial dimension
+  LOGICAL(LGT)                          :: GRID_FLAG                 ! spatial flag .true. if grid
   REAL(sp)                              :: xlon                      ! longitude (degrees) for PET computation
   REAL(sp)                              :: ylat                      ! latitude (degrees) for PET computation
   REAL(sp),dimension(:),allocatable     :: latitude                  ! latitude (degrees)
@@ -85,7 +89,7 @@ MODULE multiforce
   CHARACTER(len=strLen),dimension(:),allocatable   :: name_psets     ! name of parameter sets
   INTEGER(I4B)                          :: NUMPSET                   ! number of parameter sets
   REAL(sp),dimension(:),allocatable     :: time_steps                ! time steps (days)
-  REAL(sp),dimension(:),allocatable     :: julian_time_steps         ! time steps (julian days)
+  REAL(sp),dimension(:),allocatable     :: julian_day_input         ! time steps (julian days)
   CHARACTER(len=strLen)                 :: latUnits                  ! units string for latitude
   CHARACTER(len=strLen)                 :: lonUnits                  ! units string for longitude
   CHARACTER(len=strLen)                 :: timeUnits                 ! units string for time
@@ -149,7 +153,7 @@ MODULE multiforce
 
   ! missing values
   INTEGER(I4B),PARAMETER                :: NA_VALUE=-9999            ! integer designating missing values - TODO: retrieve from NetCDF file
-  REAL(SP),PARAMETER                    :: NA_VALUE_SP=-9999            ! integer designating missing values - TODO: retrieve from NetCDF file
+  REAL(SP),PARAMETER                    :: NA_VALUE_SP=-9999         ! integer designating missing values - TODO: retrieve from NetCDF file
 
   ! --------------------------------------------------------------------------------------
 END MODULE multiforce
